@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-i18n="title">Magnetic Piston Actuator — Feasibility Instrument v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f4f5f7;--panel:#fff;--ink:#1b2028;--muted:#69717d;--faint:#8b929c;--rule:#e2e5ea;--rule2:#c8ced6;
+  --avail:#2b6f8f;--req:#b5502a;--warn:#b7791f;--ok:#2f7d4f;--bad:#a83232;--focus:#2b6f8f}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font:13.5px/1.5 "IBM Plex Sans","Noto Sans SC",system-ui,sans-serif;font-variant-numeric:tabular-nums}
+html[lang=zh] body{font-family:"Noto Sans SC","IBM Plex Sans",system-ui,sans-serif}
+header{display:flex;align-items:baseline;gap:18px;padding:14px 24px;background:var(--panel);border-bottom:1px solid var(--rule)}
+header h1{margin:0;font-size:17px;font-weight:600;letter-spacing:-.01em;white-space:nowrap}
+header p{margin:0;color:var(--muted);font-size:12.5px;flex:1}
+.lang{flex:none;display:flex;border:1px solid var(--rule2);border-radius:6px;overflow:hidden;align-self:center}
+.lang button{border:0;background:#fff;color:var(--muted);font:inherit;font-size:12.5px;padding:5px 11px;cursor:pointer}
+.lang button.on{background:var(--ink);color:#fff}
+.wrap{display:grid;grid-template-columns:296px minmax(0,1fr)}
+aside{background:var(--panel);border-right:1px solid var(--rule);padding:10px 16px 28px;position:sticky;top:0;height:calc(100vh - 49px);overflow-y:auto}
+main{padding:16px 24px 56px;min-width:0}
+details{border-bottom:1px solid var(--rule);padding:8px 0 10px}
+details:last-of-type{border-bottom:0}
+summary{list-style:none;cursor:pointer;font-weight:600;font-size:12.5px;display:flex;align-items:center;gap:7px;padding:4px 0;user-select:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"";width:0;height:0;border-left:5px solid var(--faint);border-top:3.5px solid transparent;border-bottom:3.5px solid transparent;transition:transform .15s}
+details[open] summary::before{transform:rotate(90deg)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.row.one{grid-template-columns:1fr}.row.three{grid-template-columns:1fr 1fr 1fr}
+label{display:block;font-size:11.5px;color:var(--muted);margin-bottom:3px;line-height:1.3}
+input[type=text],input[type=number],select{width:100%;height:30px;padding:0 8px;border:1px solid var(--rule2);border-radius:5px;font:inherit;font-size:13px;color:var(--ink);background:#fff}
+input:focus,select:focus,button:focus,summary:focus{outline:2px solid var(--focus);outline-offset:1px}
+.hint{font-size:11.5px;color:var(--faint);margin:2px 0 4px;line-height:1.45}
+.new{display:inline-block;font-size:10px;font-weight:600;color:var(--avail);border:1px solid var(--avail);border-radius:3px;padding:0 4px;margin-left:5px;vertical-align:1px;line-height:1.4}
+.check{display:flex;align-items:center;gap:8px;font-size:12.5px;margin:8px 0 2px}
+.check input{width:15px;height:15px;margin:0}
+.runbar{position:sticky;bottom:0;background:linear-gradient(#fff0,#fff 30%);padding:14px 0 0;margin-top:6px}
+button.run{width:100%;height:38px;border:0;border-radius:6px;background:var(--ink);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+button.run:disabled{opacity:.5;cursor:default}
+.status{font-size:12px;color:var(--muted);margin-top:8px;min-height:16px}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:14px 18px 16px;margin-bottom:14px}
+.card h2{margin:0;font-size:14.5px;font-weight:600}
+.card .sub{color:var(--muted);font-size:12.5px;margin:2px 0 10px}
+.card .head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.controls{display:flex;gap:6px 14px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.controls select{width:auto;height:28px;font-size:12.5px}
+.fric{display:grid;grid-template-columns:1fr 1fr;gap:14px 28px}
+.fric .f{display:grid;grid-template-columns:auto 1fr 84px auto;align-items:center;gap:10px;font-size:12.5px}
+.fric .f label{margin:0;font-size:12.5px;color:var(--ink);white-space:nowrap}
+.fric input[type=range]{width:100%;accent-color:var(--req);margin:0}
+.fric input[type=number]{height:28px}
+.fric .unit{color:var(--muted);font-size:12px}
+.fric .note{grid-column:1/-1;font-size:12px;color:var(--muted);margin-top:-2px}
+.verdict{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.verdict div{padding:8px 12px;border-left:3px solid var(--rule2)}
+.verdict b{display:block;font-size:22px;font-weight:600;letter-spacing:-.02em;line-height:1.2}
+.verdict span{font-size:12px;color:var(--muted)}
+.verdict .good{border-color:var(--ok)}.verdict .warn{border-color:var(--warn)}.verdict .bad{border-color:var(--bad)}
+canvas{width:100%;height:auto;display:block;cursor:crosshair}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:11.5px;color:var(--muted);margin:2px 0 6px}
+.legend i{display:inline-block;width:16px;border-top:2px solid;vertical-align:middle;margin-right:5px}
+.legend i.d{border-top-style:dashed}
+.tblwrap{max-height:440px;overflow:auto;border:1px solid var(--rule);border-radius:6px}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px}
+th,td{padding:6px 9px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--rule)}
+th{font-weight:600;color:var(--muted);font-size:11.5px;position:sticky;top:0;background:var(--panel);z-index:1;box-shadow:0 1px 0 var(--rule)}
+td:first-child,th:first-child{text-align:left}
+tbody tr:nth-child(even) td{background:#fafbfc}
+tbody tr:hover td{background:#eef4f8}
+.tag{display:inline-block;padding:0 7px;border-radius:10px;font-size:11.5px;font-weight:500;line-height:1.6}
+.tag.ok{background:#e4f2ea;color:var(--ok)}.tag.no{background:#f8e5e5;color:var(--bad)}.tag.hot{background:#f8eedb;color:var(--warn)}
+.notes{font-size:12.5px;color:var(--muted);line-height:1.6}.notes p{margin:0 0 8px}.notes b{color:var(--ink);font-weight:600}
+.readout{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.5}.readout b{color:var(--ink);font-weight:600}
+.actions{display:flex;gap:10px;margin-top:10px;align-items:center}
+.actions button{height:30px;padding:0 12px;border:1px solid var(--rule2);border-radius:5px;background:#fff;font:inherit;font-size:12.5px;cursor:pointer}
+.empty{color:var(--faint);font-size:13px;padding:22px 0;text-align:center;grid-column:1/-1}
+@media (max-width:980px){.wrap{grid-template-columns:1fr}aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--rule)}.verdict,.fric{grid-template-columns:1fr 1fr}header{flex-wrap:wrap;gap:6px}}
+@media (max-width:640px){.verdict,.fric{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1 data-i18n="title">Magnetic Piston Actuator — Feasibility Instrument v2</h1>
+  <p data-i18n="header.desc"></p>
+  <div class="lang" role="group" aria-label="Language"><button id="langEn" class="on">EN</button><button id="langZh">中文</button></div>
+</header>
+
+<div class="wrap">
+<aside>
+  <details open><summary data-i18n="sec.bore"></summary>
+    <div class="row three">
+      <div><label data-i18n="lbl.rmin"></label><input id="rmin" type="number" step="0.5" value="2.5"></div>
+      <div><label data-i18n="lbl.rmax"></label><input id="rmax" type="number" step="0.5" value="15"></div>
+      <div><label data-i18n="lbl.pts"></label><input id="rn" type="number" step="1" value="6"></div>
+    </div>
+    <div class="row one">
+      <div><label data-i18n="lbl.stroke"></label><div style="display:flex;gap:6px"><input id="stroke" type="number" step="1" value="200" style="flex:1;min-width:0"><select id="strokeUnit" style="width:72px;flex:none"><option value="mm">mm</option><option value="uL">µL</option></select></div></div>
+    </div>
+    <div class="row">
+      <div><label data-i18n="lbl.lgas"></label><input id="lgas" type="number" step="1" value="200"></div>
+      <div><label data-i18n="lbl.vdead"></label><input id="vdead" type="number" step="0.1" value="0"></div>
+    </div>
+    <div class="row one">
+      <div><label data-i18n="lbl.mode"></label><select id="mode"><option value="single" data-i18n="opt.single"></option><option value="twosided" data-i18n="opt.twosided"></option></select></div>
+    </div>
+    <div class="row one" id="preRow" style="display:none"><div><label data-i18n="lbl.wpre"></label><input id="wpre" type="number" step="0.5" value="5"></div></div>
+    <p class="hint" data-i18n="hint.bore"></p>
+  </details>
+
+  <details open><summary data-i18n="sec.coil"></summary>
+    <div class="row one"><div><label data-i18n="lbl.spec"></label><select id="coilSpec"><option value="layers" data-i18n="opt.spec.layers"></option><option value="turns" data-i18n="opt.spec.turns"></option></select></div></div>
+    <div class="row">
+      <div><label data-i18n="lbl.awg"></label><select id="awg"><option>30</option><option>32</option><option>34</option><option selected>36</option><option>38</option><option>40</option></select></div>
+      <div id="layersBox"><label data-i18n="lbl.layers"></label><input id="layers" type="text" value="1, 4, 8, 14"></div>
+      <div id="turnsBox" style="display:none"><label data-i18n="lbl.turns"></label><input id="turnsList" type="text" value="2000, 4000, 6000, 7100"></div>
+    </div>
+    <div class="row">
+      <div><label data-i18n="lbl.current"></label><input id="current" type="number" step="0.1" value="4.0"></div>
+      <div><label data-i18n="lbl.overlap"></label><input id="overlap" type="number" step="1" value="2"></div>
+    </div>
+    <div class="row three">
+      <div><label data-i18n="lbl.dtmax"></label><input id="dtmax" type="number" step="5" value="40"></div>
+      <div><label data-i18n="lbl.h"></label><input id="hconv" type="number" step="1" value="15"></div>
+      <div><label data-i18n="lbl.duty"></label><input id="duty" type="number" step="0.05" value="1.0"></div>
+    </div>
+    <label class="check"><input id="clamp" type="checkbox"> <span data-i18n="chk.clamp"></span></label>
+    <p class="hint" data-i18n="hint.coil"></p>
+  </details>
+
+  <details open><summary data-i18n="sec.magnet"></summary>
+    <div class="row">
+      <div><label data-i18n="lbl.br"></label><input id="br" type="number" step="0.01" value="1.48"></div>
+      <div><label data-i18n="lbl.lmag"></label><input id="lmag" type="text" value="3.2, 6.35, 9.5, 12.7"></div>
+    </div>
+    <div class="row three">
+      <div><label data-i18n="lbl.clear"></label><input id="clear" type="number" step="0.05" value="0"></div>
+      <div><label data-i18n="lbl.gap"></label><input id="gap" type="number" step="0.05" value="0.25"></div>
+      <div><label data-i18n="lbl.wall"></label><input id="wall" type="number" step="0.1" value="1.0"></div>
+    </div>
+    <p class="hint" data-i18n="hint.magnet"></p>
+  </details>
+
+  <details open><summary data-i18n="sec.endcap"></summary>
+    <div class="row">
+      <div><label data-i18n="lbl.a"></label><input id="a" type="number" step="0.5" value="25"></div>
+      <div><label data-i18n="lbl.t"></label><input id="t" type="number" step="0.05" value="2.5"></div>
+    </div>
+    <div class="row">
+      <div><label data-i18n="lbl.mu"></label><input id="mu" type="number" step="0.1" value="59.8"></div>
+      <div><label data-i18n="lbl.jm"></label><input id="jm" type="number" step="0.1" value="16.92"></div>
+    </div>
+  </details>
+
+  <details><summary data-i18n="sec.num"></summary>
+    <div class="row three">
+      <div><label data-i18n="lbl.slices"></label><input id="slices" type="number" step="1" value="30"></div>
+      <div><label data-i18n="lbl.npro"></label><input id="npro" type="number" step="1" value="161"></div>
+      <div><label data-i18n="lbl.nx"></label><input id="nx" type="number" step="1" value="180"></div>
+    </div>
+    <p class="hint" data-i18n="hint.num"></p>
+  </details>
+
+  <div class="runbar">
+    <button class="run" id="run" data-i18n="btn.run"></button>
+    <div class="status" id="status"></div>
+  </div>
+</aside>
+
+<main>
+  <section class="card">
+    <div class="head"><div><h2 data-i18n="fric.title"></h2><p class="sub" data-i18n="fric.sub"></p></div></div>
+    <div class="fric">
+      <div class="f"><label data-i18n="fric.k0"></label><input id="k0s" type="range" min="0" max="3" step="0.01" value="0"><input id="k0" type="number" min="0" step="0.01" value="0"><span class="unit">N</span></div>
+      <div class="f"><label data-i18n="fric.kc"></label><input id="kcs" type="range" min="0" max="0.5" step="0.005" value="0"><input id="kc" type="number" min="0" step="0.005" value="0"><span class="unit">N/mm</span></div>
+      <div class="note" data-i18n="fric.note"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 data-i18n="verdict.title"></h2>
+    <p class="sub" data-i18n="verdict.sub"></p>
+    <div class="verdict" id="verdict"><div class="empty" data-i18n="verdict.empty"></div></div>
+  </section>
+
+  <section class="card">
+    <div class="head"><div><h2 data-i18n="p1.title"></h2><p class="sub" data-i18n="p1.sub"></p></div>
+      <div class="controls"><span><span data-i18n="ctl.coil"></span> <select id="p1Lay"></select></span><span><span data-i18n="ctl.magnet"></span> <select id="p1Len"></select></span></div></div>
+    <div class="legend" id="leg1"></div>
+    <canvas id="c1" width="1100" height="420"></canvas>
+    <div class="readout" id="giveback"></div>
+  </section>
+
+  <section class="card">
+    <div class="head"><div><h2><span data-i18n="p2.title"></span> <span class="new" data-i18n="tag.new"></span></h2><p class="sub" data-i18n="p2.sub"></p></div>
+      <div class="controls"><span><span data-i18n="ctl.coil"></span> <select id="p2Lay"></select></span><span><span data-i18n="ctl.magnet"></span> <select id="p2Len"></select></span></div></div>
+    <div class="legend" id="leg2"></div>
+    <canvas id="c2" width="1100" height="330"></canvas>
+    <div class="readout" id="rstar"></div>
+  </section>
+
+  <section class="card">
+    <div class="head"><div><h2 data-i18n="p3.title"></h2><p class="sub" data-i18n="p3.sub"></p></div>
+      <div class="controls"><span><span data-i18n="ctl.radius"></span> <select id="p3R"></select></span><span><span data-i18n="ctl.magnet"></span> <select id="p3Len"></select></span></div></div>
+    <div class="legend" id="leg3"></div>
+    <canvas id="c3" width="1100" height="360"></canvas>
+  </section>
+
+  <section class="card">
+    <div class="head"><div><h2 data-i18n="tbl.title"></h2><p class="sub" data-i18n="tbl.sub"></p></div>
+      <div class="controls"><span><span data-i18n="ctl.sort"></span> <select id="tblSort"><option value="default" data-i18n="sort.default"></option><option value="margin" data-i18n="sort.margin"></option><option value="power" data-i18n="sort.power"></option></select></span></div></div>
+    <div class="tblwrap"><table id="tbl"><thead><tr id="thead"></tr></thead><tbody></tbody></table></div>
+    <div class="actions"><button id="csv" data-i18n="btn.csv"></button><span class="readout" id="tblnote" style="margin:0"></span></div>
+  </section>
+
+  <section class="card">
+    <h2 data-i18n="notes.title"></h2>
+    <div class="notes" style="margin-top:8px">
+      <p data-i18n="notes.mag"></p>
+      <p data-i18n="notes.endcap"></p>
+      <p data-i18n="notes.two"></p>
+      <p data-i18n="notes.thermal"></p>
+      <p data-i18n="notes.not"></p>
+    </div>
+  </section>
+</main>
+</div>
+
+<script>
+/* ============ compute core (validated against Python reference) ============ */
+const MU0=4*Math.PI*1e-7, RHO_CU=1.72e-8, P_ATM=101325;
+const AWG_BARE={30:0.255e-3,32:0.202e-3,34:0.160e-3,36:0.127e-3,38:0.101e-3,40:0.0799e-3}, INS=1.085;
+function ellipKE(m){if(m<=0)return{K:Math.PI/2,E:Math.PI/2};if(m>=1)m=1-1e-14;let a=1,b=Math.sqrt(1-m),c=Math.sqrt(m),sum=.5*c*c,p=1;for(let i=0;i<40;i++){const an=.5*(a+b),bn=Math.sqrt(a*b);c=.5*(a-b);p*=2;sum+=.5*p*c*c;a=an;b=bn;if(c<1e-15)break;}const K=Math.PI/(2*a);return{K,E:K*(1-sum)};}
+function Mloop(a,b,d){const m=4*a*b/((a+b)*(a+b)+d*d),k=Math.sqrt(m),{K,E}=ellipKE(m);return MU0*Math.sqrt(a*b)*((2/k-k)*K-(2/k)*E);}
+function makeCoil(rBore,lMag,awg,layers,wall,gap,slices,pitchOverride){const wire=pitchOverride||AWG_BARE[awg]*INS,Rin=rBore+wall+gap,tpl=Math.max(1,Math.floor(lMag/wire)),N=tpl*layers,Rl=[];for(let j=0;j<layers;j++)Rl.push(Rin+(j+.5)*wire);const Rout=Rin+layers*wire,z=[],tpn=tpl/slices;for(let s=0;s<slices;s++)z.push(-lMag/2+(s+.5)*lMag/slices);const Aw=Math.PI*AWG_BARE[awg]**2/4;let wl=0;for(const r of Rl)wl+=tpl*2*Math.PI*r;const Relec=RHO_CU*wl/Aw,Asurf=2*Math.PI*Rout*lMag+2*Math.PI*(Rout*Rout-Rin*Rin);return{Rin,Rout,Rl,z,tpn,N,nAxial:N/lMag,Relec,Asurf,length:lMag,layers};}
+function fluxUnit(c,rD,zD){let t=0;for(const R of c.Rl)for(const zs of c.z)t+=Mloop(R,rD,zD-zs);return t*c.tpn;}
+function forceUnit(c,Br,rM,lM,z){return(Br/MU0)*(fluxUnit(c,rM,z+lM/2)-fluxUnit(c,rM,z-lM/2));}
+function localProfile(c,Br,rM,lM,span,n){const half=Math.floor(n/2),zs=[],F=[];for(let i=0;i<=half;i++){const z=span*i/half;zs.push(z);F.push(forceUnit(c,Br,rM,lM,z));}const Z=[],FF=[];for(let i=half;i>=1;i--){Z.push(-zs[i]);FF.push(-F[i]);}for(let i=0;i<=half;i++){Z.push(zs[i]);FF.push(F[i]);}return{z:Z,F:FF,span};}
+function interp(p,z){if(z<=-p.span||z>=p.span)return 0;const n=p.z.length,t=(z+p.span)/(2*p.span)*(n-1),i=Math.min(n-2,Math.floor(t)),f=t-i;return p.F[i]*(1-f)+p.F[i+1]*f;}
+function availableCurve(p,I,pitch,ov,xs){return xs.map(x=>{const k0=Math.floor(x/pitch)+1;let f=0;for(let k=k0;k<k0+ov;k++)f+=Math.abs(interp(p,x-k*pitch));return f*I;});}
+function gentCap(w,a,t,mu,Jm){if(w<=0)return 0;const b=w/a,l2=1+b*b,I1=2*l2+1/(l2*l2),den=Jm-(I1-3);if(den<=1e-9)return Infinity;return(4*mu*t/a)*b*(l2-1/(l2*l2))/(l2*l2)*(Jm/den);}
+function capVol(w,a){return Math.PI*w*(3*a*a+w*w)/6;}
+function chamber(V0,dV,a,t,mu,Jm,wPre){   const Vpre=capVol(wPre,a), Vfree=V0-dV-Vpre;   let lo2=1,hi2=1+Jm; for(let i=0;i<60;i++){const m=.5*(lo2+hi2);(2*m+1/(m*m)-3<Jm)?lo2=m:hi2=m;} const wLock=a*Math.sqrt(Math.max(lo2-1,1e-12));   let wl=-6*a,wh=wLock; for(let i=0;i<60;i++){const m=.5*(wl+wh);(Vfree+capVol(m,a)<=1e-4*V0)?wl=m:wh=m;} const wMin=wh;   const gas=w=>P_ATM*V0/(Vfree+capVol(w,a))-P_ATM;   const memb=w=>w>=0?gentCap(w,a,t,mu,Jm):-gentCap(-w,a,t,mu,Jm);   const res=w=>gas(w)-memb(w);   let lo=wMin,hi=0.999*wLock,flo=res(lo),fhi=res(hi);   if(!(flo>0)||!(fhi<0)){ return {p:Infinity,w0:hi,burst:true}; }   for(let i=0;i<80;i++){const mid=.5*(lo+hi),fm=res(mid);if(fm>0){lo=mid;flo=fm;}else hi=mid;}   const w=.5*(lo+hi); return {p:memb(w),w0:w,burst:false}; }
+function requiredCurve(mode,r,xs,mb,Lgas,Vdead,wPre){const A=Math.PI*r*r;return xs.map(x=>{if(mode==='single'){const c=chamber(A*Lgas+Vdead,A*x,mb.a,mb.t,mb.mu,mb.Jm,0);return{F:c.p*A,p:c.p,w0:c.w0};}const V0=A*Lgas/2+Vdead/2,ca=chamber(V0,A*x,mb.a,mb.t,mb.mu,mb.Jm,wPre),cb=chamber(V0,-A*x,mb.a,mb.t,mb.mu,mb.Jm,wPre);return{F:(ca.p-cb.p)*A,p:ca.p,w0:ca.w0};});}
+
+
+/* ============ i18n ============ */
+const I18N={
+en:{
+ title:'Magnetic Piston Actuator — Feasibility Instrument v2',
+ 'header.desc':'Required force (Gent endcap + Boyle) against available force (exact finite coaxial solenoid) along the plunger stroke, with thermal, clearance, dead-volume, friction and two-sided extensions.',
+ 'tag.new':'new',
+ 'sec.bore':'Bore radius and stroke','lbl.rmin':'Min radius (mm)','lbl.rmax':'Max radius (mm)','lbl.pts':'Points','lbl.stroke':'Full stroke','lbl.lgas':'Gas column at start (mm)','lbl.vdead':'Dead volume (mL)<span class="new">new</span>','lbl.mode':'Configuration<span class="new">new</span>','opt.single':'Single endcap','opt.twosided':'Two-sided, zero-sum','lbl.wpre':'Pre-inflation of both endcaps, w₀ (mm)',
+ 'hint.bore':'Stroke in µL fixes the swept volume and converts to a length per radius. Two-sided: net force is zero at neutral whatever the working pressure; keep the swept volume within what the relaxing side can give back.',
+ 'sec.coil':'Coil','lbl.spec':'Specification','opt.spec.layers':'Wire gauge + layers (computes turns/m, R, heating)','opt.spec.turns':'Turns per metre list (original tool)','lbl.awg':'Wire gauge (AWG)','lbl.layers':'Layers list<span class="new">new</span>','lbl.turns':'Turns per metre list','lbl.current':'Drive current (A)','lbl.overlap':'Active ahead-coils (overlap)','lbl.dtmax':'ΔT limit (K)','lbl.h':'h (W/m²K)','lbl.duty':'Duty cycle','chk.clamp':'Clamp current to the thermal limit',
+ 'hint.coil':'Thermal limit and clamp are new in v2. A single coil\'s pull is exactly zero at its own alignment point; overlap ≥ 2 avoids stalling there. Duty 1.0 is the conservative case of a coil holding the piston at end of stroke.',
+ 'sec.magnet':'Magnet','lbl.br':'Remanence B<sub>r</sub> (T)','lbl.lmag':'Length list (mm)','lbl.clear':'Radial clearance (mm)','lbl.gap':'Gap C (mm)','lbl.wall':'Tube wall (mm)',
+ 'hint.magnet':'Radial clearance is new in v2: magnet OD = bore ID − 2 × clearance; 0 reproduces the original rule. Coil length = magnet length = commutation pitch.',
+ 'sec.endcap':'Endcap','lbl.a':'Inner radius a (mm)','lbl.t':'Wall thickness (mm)','lbl.mu':'Gent μ (kPa)','lbl.jm':'Gent J<sub>m</sub>',
+ 'sec.num':'Numerical resolution','lbl.slices':'Coil slices','lbl.npro':'Profile points','lbl.nx':'Stroke points','hint.num':'30 slices are within 0.02% of the converged force. Radius × length × coil combinations above ~60 take a few seconds.',
+ 'btn.run':'Run simulation','status.init':'Set parameters and run.','status.busy':'Computing…','status.err':'Error: ','status.done':'Done in {dt} s — {nr} radii × {nl} lengths × {nv} coil variants.',
+ 'fric.title':'Friction allowance','fric.sub':'Added to the required-force curve as k = k₀ + c·r. Updates every plot and the table instantly; no re-run needed.','fric.k0':'Constant k₀','fric.kc':'Per mm of bore radius c',
+ 'fric.note':'Reference for c: ferrofluid liquid seal ≈ 0.02, lapped dry clearance ≈ 0.05, PTFE lip seal ≈ 0.15, rubber plunger ≈ 0.4 N/mm. A per-radius term is what makes an optimal bore radius appear in the margin plot.',
+ 'verdict.title':'Verdict','verdict.sub':'Feasible: available − required − friction stays above zero over the whole stroke. Thermal OK: drive current within the coil\'s steady-state limit.','verdict.empty':'No results yet.',
+ 'v.pos':'configurations with positive worst-case margin','v.therm':'exceed the coil thermal limit at the drive current','v.both':'feasible and thermally valid','v.best':'best valid point: {lm} mm magnet, {coil}, margin {m} N at {I} A','v.none':'no configuration is both feasible and thermally valid',
+ 'p1.title':'Required vs available force, all radii','p1.sub':'Solid = required (endcap + friction). Dashed = available (magnetic). Darker = larger bore. Hover for values.','ctl.coil':'Coil','ctl.magnet':'Magnet','ctl.radius':'Radius','ctl.sort':'Sort',
+ 'p2.title':'Worst-case margin against bore radius','p2.sub':'Load grows as r², magnet pull roughly as r, friction as r: the difference has an interior maximum. Hover for values; click a point to open that radius below.',
+ 'p3.title':'Per-radius detail','p3.sub':'All coil variants for one bore radius, against the required curve.',
+ 'tbl.title':'Feasibility summary','tbl.sub':'Worst-case margin over the stroke at the chosen overlap, with coil electrical and thermal figures. "p end" is the endcap gauge pressure at end of stroke; a positive margin with a low p end means the stroke was absorbed by gas compression, not delivered to the membrane.',
+ 'sort.default':'by radius','sort.margin':'by margin','sort.power':'by power','btn.csv':'Download CSV','tbl.note':'{n} rows · friction k = {k0} + {kc}·r N',
+ th:['Radius','Magnet L','Coil','Turns/m','N','R (Ω)','I (A)','P (W)','ΔT (K)','I<sub>max</sub> (A)','Worst margin (N)','At x (mm)','p end (kPa)','Feasible','Thermal'],
+ yes:'Yes',no:'No',ok:'OK',over:'Over',
+ layers:'{n} layer',layersP:'{n} layers',turns:'{n} turns/m',
+ 'x.disp':'Plunger displacement (mm)','y.force':'Force (N)','x.radius':'Bore radius (mm)','y.margin':'Worst-case margin (N)',
+ 'lg.req':'Required r={r}','lg.av':'Available r={r}','lg.reqfull':'Required (endcap + friction)','lg.avv':'Available, {coil}','lg.with':'Worst-case margin with friction','lg.without':'Without friction','s.with':'With friction','s.without':'Without friction','s.req':'Required',
+ 'giveback':'Two-sided: the relaxing endcap can give back <b>{v} µL</b> before it goes flat, at x = {xl} mm for the largest bore and {xs} mm for the smallest. Beyond that the back side is pulled into vacuum and the curve steepens.',
+ 'rstar':'{coil}, {lm} mm magnet: margin peaks at <b>r ≈ {r} mm</b> ({m} N). ','rstar.edge':'<b>The peak sits at the edge of the sweep; widen the radius range to locate it.</b> ','rstar.nofric':'With zero friction the optimum is set only by the r against r² competition; add a per-radius friction term above to see how it moves.','rstar.fric':'Friction k = {k0} + {kc}·r N.',
+ 'notes.title':'Model notes',
+ 'notes.mag':'<b>Magnetics.</b> The magnet is a uniformly magnetised cylinder, equivalent to surface poles on its end faces. Force = (B<sub>r</sub>/μ₀)·I·[M(top face) − M(bottom face)], with M the exact mutual inductance between the multi-layer coil and a loop of the magnet\'s radius, in complete elliptic integrals. Cross-checked against an independent Python implementation to machine precision and against the original tool\'s plotted peaks to about 1%, and its tabulated margins to within 0.01–0.05 N. Commutation follows the original rule: the nearest <i>overlap</i> coils ahead of the magnet are energised attractively; the dip at each coil centre is real geometry.',
+ 'notes.endcap':'<b>Endcap.</b> Lumped spherical cap with uniform equibiaxial stretch λ² = 1 + (w₀/a)², incompressible thinning t/λ², Gent stress μ(λ² − λ⁻⁴)·J<sub>m</sub>/(J<sub>m</sub> − (I₁ − 3)), Laplace p = 2σt′/R, solved together with Boyle\'s law for the trapped gas. <b>Known divergence from the original tool:</b> for w₀/a ≳ 1.5 this model stiffens toward the Gent lock while the original plateaus near the neo-Hookean maximum 1.84 μt/a; both agree for w₀/a ≲ 1. A bulge test on the real membrane is the only way to settle the large-stretch lumping. The model is pure stretching with no bending term, so it underestimates pressure while w₀ ≲ t.',
+ 'notes.two':'<b>Two-sided mode.</b> Both endcaps start at the same pre-inflation, so the net load is zero at neutral however high the working pressure is; the pump modulates the joint pressure rather than holding it. Both membranes sit on the stiff part of their curves, so the incremental load per millimetre is higher than for a flat single endcap. Past the relaxing side\'s give-back volume the back membrane inverts and adds a vacuum load.',
+ 'notes.thermal':'<b>Thermal.</b> Steady-state ΔT = I²R·duty/(h·A<sub>surf</sub>), natural convection from the coil\'s outer surface. Deliberately simple: values far above a few hundred kelvin only mean "far over", and exist so that a current which would melt the winding is flagged rather than reported feasible.',
+ 'notes.not':'<b>Not modelled.</b> Ferrofluid seal behaviour at a gas interface, magnet rotation off-axis, eddy currents, wire temperature coefficient, dynamics and back-EMF, and anything downstream of the endcap. A design-space exploration tool, not a substitute for hardware.'
+},
+zh:{
+ title:'磁力活塞执行器 — 可行性分析仪 v2',
+ 'header.desc':'沿活塞行程比较所需力（Gent 超弹性端盖 + 玻意耳定律）与可用力（精确有限共轴螺线管模型），并扩展了热学限制、径向间隙、死体积、摩擦模型与双侧零和模式。',
+ 'tag.new':'新增',
+ 'sec.bore':'缸体半径与行程','lbl.rmin':'最小半径 (mm)','lbl.rmax':'最大半径 (mm)','lbl.pts':'点数','lbl.stroke':'全行程','lbl.lgas':'初始气柱长度 (mm)','lbl.vdead':'死体积 (mL)<span class="new">新增</span>','lbl.mode':'构型<span class="new">新增</span>','opt.single':'单端盖','opt.twosided':'双侧零和','lbl.wpre':'两侧端盖预充位移 w₀ (mm)',
+ 'hint.bore':'以 µL 指定行程即固定扫过体积，并按每个半径换算为长度。双侧模式：无论工作压力多高，中立点净力为零；扫过体积须不超过松弛侧能回吐的量。',
+ 'sec.coil':'线圈','lbl.spec':'指定方式','opt.spec.layers':'线径 + 层数（自动算匝数/米、电阻、发热）','opt.spec.turns':'每米匝数列表（原工具方式）','lbl.awg':'线径 (AWG)','lbl.layers':'层数列表<span class="new">新增</span>','lbl.turns':'每米匝数列表','lbl.current':'驱动电流 (A)','lbl.overlap':'同时激活的前方线圈数 (overlap)','lbl.dtmax':'温升上限 ΔT (K)','lbl.h':'对流系数 h (W/m²K)','lbl.duty':'占空比','chk.clamp':'将电流钳制到热学上限',
+ 'hint.coil':'热学上限与钳制为 v2 新增。单个线圈在其对齐点处出力精确为零，overlap ≥ 2 可避免在该处失速。占空比 1.0 为保守情形：线圈在行程末端持续通电保持活塞。',
+ 'sec.magnet':'磁铁','lbl.br':'剩磁 B<sub>r</sub> (T)','lbl.lmag':'长度列表 (mm)','lbl.clear':'径向间隙 (mm)','lbl.gap':'线圈间隙 C (mm)','lbl.wall':'管壁厚 (mm)',
+ 'hint.magnet':'径向间隙为 v2 新增：磁铁外径 = 缸体内径 − 2 × 间隙；取 0 即原工具的锁定规则。线圈长度 = 磁铁长度 = 换向节距。',
+ 'sec.endcap':'端盖','lbl.a':'膜片内半径 a (mm)','lbl.t':'膜厚 (mm)','lbl.mu':'Gent μ (kPa)','lbl.jm':'Gent J<sub>m</sub>',
+ 'sec.num':'数值分辨率','lbl.slices':'线圈切片数','lbl.npro':'剖面点数','lbl.nx':'行程点数','hint.num':'30 切片与收敛值相差不到 0.02%。半径 × 长度 × 线圈组合数超过约 60 时需几秒。',
+ 'btn.run':'运行仿真','status.init':'设置参数后运行。','status.busy':'计算中…','status.err':'错误：','status.done':'完成，用时 {dt} s — {nr} 个半径 × {nl} 个磁铁长度 × {nv} 种线圈。',
+ 'fric.title':'摩擦余量','fric.sub':'以 k = k₀ + c·r 叠加到所需力曲线上。拖动即时更新全部图表与表格，无需重跑仿真。','fric.k0':'常数项 k₀','fric.kc':'每毫米缸体半径 c',
+ 'fric.note':'c 的参考值：铁磁流体液态密封 ≈ 0.02，研磨干式间隙 ≈ 0.05，PTFE 唇形密封 ≈ 0.15，橡胶活塞 ≈ 0.4 N/mm。正是随半径变化的这一项使余量图中出现最优缸体半径。',
+ 'verdict.title':'结论','verdict.sub':'可行：可用力 − 所需力 − 摩擦在全行程上保持为正。热学合格：驱动电流不超过线圈的稠态温升上限。','verdict.empty':'尚无结果。',
+ 'v.pos':'组配置的最差余量为正','v.therm':'组在该驱动电流下超过线圈热学上限','v.both':'组既可行又热学合格','v.best':'最佳合格点：{lm} mm 磁铁，{coil}，余量 {m} N，电流 {I} A','v.none':'没有任何配置同时满足可行与热学合格',
+ 'p1.title':'所需力对可用力（全部半径）','p1.sub':'实线 = 所需力（端盖 + 摩擦）。虚线 = 可用力（磁力）。颜色越深内径越大。悬停可读数。','ctl.coil':'线圈','ctl.magnet':'磁铁','ctl.radius':'半径','ctl.sort':'排序',
+ 'p2.title':'最差余量对缸体半径','p2.sub':'负载按 r² 增长，磁力约按 r，摩擦按 r：两者之差存在内部极大值。悬停可读数；点击某点可在下方打开该半径的详情。',
+ 'p3.title':'单半径详情','p3.sub':'同一缸体半径下的全部线圈变体，对照所需力曲线。',
+ 'tbl.title':'可行性汇总','tbl.sub':'在所选 overlap 下全行程的最差余量，附线圈电学与热学参数。"末端压力"为行程末端的端盖表压；余量为正但末端压力很低，说明行程被气体压缩吸收而未传递到膜片。',
+ 'sort.default':'按半径','sort.margin':'按余量','sort.power':'按功耗','btn.csv':'下载 CSV','tbl.note':'共 {n} 行 · 摩擦 k = {k0} + {kc}·r N',
+ th:['半径','磁铁长度','线圈','匝数/m','N','R (Ω)','I (A)','P (W)','ΔT (K)','I<sub>max</sub> (A)','最差余量 (N)','对应位移 x (mm)','末端压力 (kPa)','可行','热学'],
+ yes:'是',no:'否',ok:'合格',over:'超限',
+ layers:'{n} 层',layersP:'{n} 层',turns:'{n} 匝/m',
+ 'x.disp':'活塞位移 (mm)','y.force':'力 (N)','x.radius':'缸体半径 (mm)','y.margin':'最差余量 (N)',
+ 'lg.req':'所需 r={r}','lg.av':'可用 r={r}','lg.reqfull':'所需力（端盖 + 摩擦）','lg.avv':'可用力，{coil}','lg.with':'含摩擦的最差余量','lg.without':'不含摩擦','s.with':'含摩擦','s.without':'不含摩擦','s.req':'所需力',
+ 'giveback':'双侧模式：松弛侧端盖在回到平膜之前最多能回吐 <b>{v} µL</b>；最大内径在 x = {xl} mm 处见底，最小内径在 x = {xs} mm 处见底。超过该点后背侧被抽成负压，曲线陡升。',
+ 'rstar':'{coil}，{lm} mm 磁铁：余量在 <b>r ≈ {r} mm</b> 处达到峰值（{m} N）。','rstar.edge':'<b>峰值位于扫描范围边缘，请扩大半径范围以定位。</b> ','rstar.nofric':'摩擦为零时，最优点仅由 r 与 r² 的竞争决定；在上方加入随半径变化的摩擦项可观察其移动。','rstar.fric':'摩擦 k = {k0} + {kc}·r N。',
+ 'notes.title':'模型说明',
+ 'notes.mag':'<b>磁力。</b>磁铁视为均匀磁化圆柱，等效于两端面上的面磁荷。力 = (B<sub>r</sub>/μ₀)·I·[M(顶面) − M(底面)]，其中 M 为多层线圈与磁铁半径圆环之间的精确互感，以完全椭圆积分计算。已与独立的 Python 实现对到机器精度，与原工具的曲线峰值相差约 1%，与其表格余量相差 0.01–0.05 N。换向沿用原工具规则：磁铁前方最近的 <i>overlap</i> 个线圈以吸引极性通电；每个线圈中心处的凹陷是真实几何效应。',
+ 'notes.endcap':'<b>端盖。</b>集总球冠模型，均匀等双轴伸长 λ² = 1 + (w₀/a)²，不可压缩减薄 t/λ²，Gent 应力 μ(λ² − λ⁻⁴)·J<sub>m</sub>/(J<sub>m</sub> − (I₁ − 3))，拉普拉斯定律 p = 2σt′/R，与被封气体的玻意耳定律联立求解。<b>与原工具的已知分歧：</b>w₀/a ≳ 1.5 时本模型向 Gent 锁定硬化，原工具则在 neo-Hookean 峰值 1.84 μt/a 附近趋于平台；w₀/a ≲ 1 时两者一致。只有在真实膜片上做 bulge test 才能裁决大变形下的集总方式。本模型为纯拉伸、无弯曲项，因此在 w₀ ≲ t 时低估压力。',
+ 'notes.two':'<b>双侧模式。</b>两侧端盖从相同的预充状态出发，因此无论工作压力多高，中立点的净负载为零——泵只调制关节压力，而不必持续保持它。两片膜都工作在曲线的陡峭段，因此每毫米行程的增量负载高于从平膜开始的单端盖。超过松弛侧的回吐体积后，背侧膜片翻转并附加负压负载。',
+ 'notes.thermal':'<b>热学。</b>稠态温升 ΔT = I²R·占空比/(h·A<sub>surf</sub>)，按线圈外表面自然对流估算。刻意从简：远超几百 K 的数值只表示"远远超限"，其目的是把会烧毁绕组的电流标记出来，而不是报告为可行。',
+ 'notes.not':'<b>未建模。</b>铁磁流体密封在气液界面的行为、磁铁偏轴旋转、涡流、导线温度系数、动力学与反电动势，以及端盖下游的一切。这是设计空间探索工具，不能替代硬件验证。'
+}};
+let LANG=(navigator.language||'').toLowerCase().startsWith('zh')?'zh':'en';
+function t(k,p){let s=I18N[LANG][k];if(s===undefined)s=I18N.en[k];if(typeof s!=='string')return s;if(p)for(const q in p)s=s.split('{'+q+'}').join(p[q]);return s;}
+function applyLang(){
+  document.documentElement.lang=LANG;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{const v=t(el.dataset.i18n);if(v===undefined)return;if(el.tagName==='TITLE')el.textContent=v.replace(/<[^>]+>/g,'');else el.innerHTML=v;});
+  $('langEn').classList.toggle('on',LANG==='en');$('langZh').classList.toggle('on',LANG==='zh');
+  $('thead').innerHTML=t('th').map(h=>`<th>${h}</th>`).join('');
+  if(!RES)$('status').textContent=t('status.init');
+  else{ $('status').textContent=t('status.done',{dt:(RES.dt/1000).toFixed(1),nr:RES.radii.length,nl:RES.lensL.length,nv:RES.variants.length}); refreshSelects(); render(false); }
+}
+
+/* ============ UI ============ */
+const $=id=>document.getElementById(id);
+const num=id=>parseFloat($(id).value);
+const list=id=>$(id).value.split(',').map(s=>parseFloat(s.trim())).filter(v=>isFinite(v)&&v>0);
+const fmt=(v,d=2)=>isFinite(v)?v.toFixed(d):'—';
+let RES=null;
+
+$('langEn').addEventListener('click',()=>{LANG='en';applyLang();});
+$('langZh').addEventListener('click',()=>{LANG='zh';applyLang();});
+$('coilSpec').addEventListener('change',()=>{const tt=$('coilSpec').value==='turns';$('layersBox').style.display=tt?'none':'';$('turnsBox').style.display=tt?'':'none';});
+$('mode').addEventListener('change',()=>{$('preRow').style.display=$('mode').value==='twosided'?'':'none';});
+function bind(slider,box){slider.addEventListener('input',()=>{box.value=slider.value;onFriction();});box.addEventListener('input',()=>{if(box.value!=='')slider.value=Math.min(parseFloat(slider.max),parseFloat(box.value));onFriction();});}
+bind($('k0s'),$('k0'));bind($('kcs'),$('kc'));
+function onFriction(){if(RES){applyFriction();render(false);}}
+
+function ramp(tt,which){const A=[[173,205,220],[43,111,143],[15,52,72]],R=[[232,190,165],[181,80,42],[92,36,16]];const c=which==='a'?A:R;const seg=tt<.5?[c[0],c[1],tt*2]:[c[1],c[2],(tt-.5)*2];const m=seg[0].map((v,i)=>Math.round(v+(seg[1][i]-v)*seg[2]));return `rgb(${m[0]},${m[1]},${m[2]})`;}
+const coilLabel=v=>RES&&RES.coilSpec==='turns'?t('turns',{n:v}):t(v>1?'layersP':'layers',{n:v});
+
+/* ---- plotting with hover ---- */
+function nice(lo,hi,n){const r=hi-lo||1,raw=r/n,p=Math.pow(10,Math.floor(Math.log10(raw))),m=raw/p,st=(m<1.5?1:m<3.5?2:m<7.5?5:10)*p,out=[];for(let v=Math.ceil(lo/st)*st;v<=hi+1e-9;v+=st)out.push(+v.toFixed(10));return out;}
+const FONT=()=>LANG==='zh'?'"Noto Sans SC", "IBM Plex Sans", system-ui':'"IBM Plex Sans", system-ui';
+function plot(canvas,series,xlab,ylab,opts={}){
+  const ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height,L=62,Rm=16,T=12,B=44;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
+  let xmin=Infinity,xmax=-Infinity,ymin=Infinity,ymax=-Infinity;
+  for(const s of series)for(let i=0;i<s.x.length;i++){const y=s.y[i];if(!isFinite(y))continue;xmin=Math.min(xmin,s.x[i]);xmax=Math.max(xmax,s.x[i]);ymin=Math.min(ymin,y);ymax=Math.max(ymax,y);}
+  if(!isFinite(xmin)){canvas._plot=null;return;}
+  if(xmax===xmin){xmin-=.5;xmax+=.5;}
+  if(opts.y0)ymin=Math.min(0,ymin);if(opts.yzero)ymax=Math.max(ymax,0);
+  const pad=(ymax-ymin)*.07||1;ymax+=pad;if(!opts.y0)ymin-=pad;
+  const sx=x=>L+(x-xmin)/(xmax-xmin)*(W-L-Rm),sy=y=>T+(ymax-y)/(ymax-ymin)*(H-T-B);
+  ctx.strokeStyle='#eceef1';ctx.lineWidth=1;ctx.fillStyle='#6a7280';ctx.font='12px '+FONT();
+  for(const v of nice(ymin,ymax,6)){ctx.beginPath();ctx.moveTo(L,sy(v));ctx.lineTo(W-Rm,sy(v));ctx.stroke();ctx.textAlign='right';ctx.fillText(v.toFixed(Math.abs(v)<1&&v!==0?2:1),L-8,sy(v)+4);}
+  for(const v of nice(xmin,xmax,8)){ctx.beginPath();ctx.moveTo(sx(v),T);ctx.lineTo(sx(v),H-B);ctx.stroke();ctx.textAlign='center';ctx.fillText(v.toFixed(v%1?1:0),sx(v),H-B+16);}
+  if(opts.yzero&&ymin<0){ctx.strokeStyle='#9aa1ab';ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(L,sy(0));ctx.lineTo(W-Rm,sy(0));ctx.stroke();ctx.setLineDash([]);}
+  ctx.strokeStyle='#c8ced6';ctx.beginPath();ctx.moveTo(L,T);ctx.lineTo(L,H-B);ctx.lineTo(W-Rm,H-B);ctx.stroke();
+  ctx.fillStyle='#4a525e';ctx.textAlign='center';ctx.fillText(xlab,(L+W-Rm)/2,H-7);
+  ctx.save();ctx.translate(13,(T+H-B)/2);ctx.rotate(-Math.PI/2);ctx.fillText(ylab,0,0);ctx.restore();
+  for(const s of series){ctx.strokeStyle=s.color;ctx.lineWidth=s.width||1.6;ctx.setLineDash(s.dash?[6,4]:[]);ctx.beginPath();let pen=false;for(let i=0;i<s.x.length;i++){const y=s.y[i];if(!isFinite(y)){pen=false;continue;}const X=sx(s.x[i]),Y=sy(y);pen?ctx.lineTo(X,Y):ctx.moveTo(X,Y);pen=true;}ctx.stroke();ctx.setLineDash([]);
+    if(s.points)for(let i=0;i<s.x.length;i++){if(!isFinite(s.y[i]))continue;ctx.fillStyle=s.color;ctx.beginPath();ctx.arc(sx(s.x[i]),sy(s.y[i]),3,0,2*Math.PI);ctx.fill();}
+    if(s.marker)for(const m of s.marker){ctx.fillStyle=s.color;ctx.beginPath();ctx.arc(sx(m[0]),sy(m[1]),5.5,0,2*Math.PI);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(sx(m[0]),sy(m[1]),2.2,0,2*Math.PI);ctx.fill();ctx.fillStyle='#1b2028';ctx.textAlign='left';ctx.fillText(m[2],sx(m[0])+10,sy(m[1])-8);}}
+  canvas._plot={series,xlab,ylab,opts,sx,sy,L,Rm,T,B,W,H,xmin,xmax,inv:px=>xmin+(px-L)/(W-L-Rm)*(xmax-xmin),xfmt:opts.xfmt||(v=>v.toFixed(2)),yfmt:opts.yfmt||(v=>v.toFixed(3))};
+}
+function nearest(s,xd){let bi=-1,bd=Infinity;for(let i=0;i<s.x.length;i++){const d=Math.abs(s.x[i]-xd);if(d<bd){bd=d;bi=i;}}return{bi,bd};}
+function drawHover(canvas,px,py){
+  const st=canvas._plot;if(!st)return;const xd=st.inv(px),ctx=canvas.getContext('2d');
+  plot(canvas,st.series,st.xlab,st.ylab,st.opts);
+  ctx.strokeStyle='#9aa1ab';ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(px,st.T);ctx.lineTo(px,st.H-st.B);ctx.stroke();ctx.setLineDash([]);
+  const lines=[];let xshow=xd;
+  for(const s of st.series){const{bi,bd}=nearest(s,xd);if(bi<0)continue;const tol=s.x.length>1?(s.x[s.x.length-1]-s.x[0])/(s.x.length-1)*1.5:Infinity;if(bd>tol)continue;const y=s.y[bi];if(!isFinite(y))continue;if(s.snap)xshow=s.x[bi];lines.push({c:s.color,t:(s.label?s.label+'  ':'')+st.yfmt(y),dash:s.dash});ctx.fillStyle=s.color;ctx.beginPath();ctx.arc(st.sx(s.x[bi]),st.sy(y),3.5,0,2*Math.PI);ctx.fill();}
+  if(!lines.length)return;
+  ctx.font='12px '+FONT();const title=`${st.xlab.replace(/\s*\(.*\)/,'')} ${st.xfmt(xshow)}`;
+  const w=Math.max(ctx.measureText(title).width,...lines.map(l=>ctx.measureText(l.t).width+18))+22,h=lines.length*17+30;
+  let bx=px+14;if(bx+w>st.W-st.Rm)bx=px-14-w;const by=Math.max(st.T,Math.min(py-h/2,st.H-st.B-h));
+  ctx.fillStyle='rgba(255,255,255,.97)';ctx.strokeStyle='#c8ced6';ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(bx,by,w,h,5);ctx.fill();ctx.stroke();
+  ctx.fillStyle='#1b2028';ctx.textAlign='left';ctx.font='600 12px '+FONT();ctx.fillText(title,bx+11,by+17);ctx.font='12px '+FONT();
+  lines.forEach((l,i)=>{ctx.strokeStyle=l.c;ctx.lineWidth=2;ctx.setLineDash(l.dash?[3,2]:[]);ctx.beginPath();ctx.moveTo(bx+11,by+34+i*17);ctx.lineTo(bx+23,by+34+i*17);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#1b2028';ctx.fillText(l.t,bx+29,by+38+i*17);});
+}
+function attachHover(canvas,onClick){
+  const pos=e=>{const r=canvas.getBoundingClientRect();return[(e.clientX-r.left)*canvas.width/r.width,(e.clientY-r.top)*canvas.height/r.height];};
+  canvas.addEventListener('mousemove',e=>{const st=canvas._plot;if(!st)return;const[px,py]=pos(e);if(px<st.L||px>st.W-st.Rm||py<st.T||py>st.H-st.B){plot(canvas,st.series,st.xlab,st.ylab,st.opts);return;}drawHover(canvas,px,py);});
+  canvas.addEventListener('mouseleave',()=>{const st=canvas._plot;if(st)plot(canvas,st.series,st.xlab,st.ylab,st.opts);});
+  if(onClick)canvas.addEventListener('click',e=>{const st=canvas._plot;if(!st)return;const[px]=pos(e);onClick(st.inv(px));});
+}
+attachHover($('c1'));attachHover($('c3'));
+attachHover($('c2'),xd=>{if(!RES)return;let bi=0;RES.radii.forEach((r,i)=>{if(Math.abs(r*1e3-xd)<Math.abs(RES.radii[bi]*1e3-xd))bi=i;});$('p3R').value=RES.radii[bi];draw3();$('c3').scrollIntoView({behavior:'smooth',block:'nearest'});});
+const legendHTML=items=>items.map(it=>`<span><i style="border-color:${it.color}" class="${it.dash?'d':''}"></i>${it.label}</span>`).join('');
+
+/* ---- compute ---- */
+function run(){const b=$('run');b.disabled=true;$('status').textContent=t('status.busy');setTimeout(()=>{try{compute();}catch(e){$('status').textContent=t('status.err')+e.message;console.error(e);}b.disabled=false;},20);}
+function compute(){
+  const t0=performance.now();
+  const rmin=num('rmin')*1e-3,rmax=num('rmax')*1e-3,rn=Math.max(1,Math.round(num('rn')));
+  const radii=[];for(let i=0;i<rn;i++)radii.push(rn===1?rmin:rmin+(rmax-rmin)*i/(rn-1));
+  const strokeIn=num('stroke'),strokeUnit=$('strokeUnit').value,Lgas=num('lgas')*1e-3,Vdead=num('vdead')*1e-6,mode=$('mode').value,wPre=num('wpre')*1e-3;
+  const awg=parseInt($('awg').value),coilSpec=$('coilSpec').value,variants=coilSpec==='turns'?list('turnsList'):list('layers').map(Math.round),I0=num('current'),ov=Math.max(1,Math.round(num('overlap')));
+  const dTmax=num('dtmax'),h=num('hconv'),duty=num('duty'),clamp=$('clamp').checked;
+  const Br=num('br'),lensL=list('lmag').map(v=>v*1e-3),clear=num('clear')*1e-3,gap=num('gap')*1e-3,wall=num('wall')*1e-3;
+  const mb={a:num('a')*1e-3,t:num('t')*1e-3,mu:num('mu')*1e3,Jm:num('jm')};
+  const slices=Math.max(6,Math.round(num('slices'))),npro=Math.max(21,Math.round(num('npro'))|1),nx=Math.max(20,Math.round(num('nx')));
+  const reqRaw={},xsByR={},configs=[];
+  for(const r of radii){
+    const stroke=strokeUnit==='uL'?strokeIn*1e-9/(Math.PI*r*r):strokeIn*1e-3;
+    const xs=[];for(let i=0;i<=nx;i++)xs.push(stroke*i/nx);xsByR[r]=xs;
+    const rc=requiredCurve(mode,r,xs,mb,Lgas,Vdead,wPre);reqRaw[r]={F:rc.map(o=>o.F),p:rc.map(o=>o.p)};
+    for(const lm of lensL)for(const v of variants){
+      const rMag=Math.max(1e-4,r-clear);
+      const coil=coilSpec==='turns'?makeCoil(r,lm,awg,1,wall,gap,slices,1/v):makeCoil(r,lm,awg,v,wall,gap,slices);
+      const prof=localProfile(coil,Br,rMag,lm,2.2*lm,npro);
+      const Imax=Math.sqrt(dTmax*h*coil.Asurf/(coil.Relec*duty)),I=clamp?Math.min(I0,Imax):I0;
+      const av=availableCurve(prof,I,lm,ov,xs);
+      configs.push({r,lm,v,n:coil.nAxial,N:coil.N,R:coil.Relec,I,P:I*I*coil.Relec,dT:I*I*coil.Relec*duty/(h*coil.Asurf),Imax,therm:I<=Imax+1e-9,av,pend:reqRaw[r].p[nx]});
+    }
+  }
+  RES={radii,lensL,variants,xsByR,reqRaw,configs,mode,wPre,mb,coilSpec,dt:performance.now()-t0};
+  applyFriction();$('status').textContent=t('status.done',{dt:(RES.dt/1000).toFixed(1),nr:radii.length,nl:lensL.length,nv:variants.length});refreshSelects();render(true);
+}
+function applyFriction(){
+  const R=RES,k0=num('k0')||0,kc=num('kc')||0;R.fric={k0,kc};R.req={};
+  for(const r of R.radii){const k=k0+kc*r*1e3;R.req[r]={F:R.reqRaw[r].F.map(v=>v+k),k};}
+  for(const c of R.configs){const rq=R.req[c.r].F;let wi=0,best=Infinity;c.marg=c.av.map((v,i)=>{const m=v-rq[i];if(m<best){best=m;wi=i;}return m;});c.worst=best;c.xw=R.xsByR[c.r][wi];c.feas=best>0;}
+}
+function cfg(r,lm,v){return RES.configs.find(c=>c.r===r&&c.lm===lm&&c.v===v);}
+
+/* ---- render ---- */
+function fill(sel,vals,f){const s=$(sel),prev=s.value;s.innerHTML=vals.map(v=>`<option value="${v}">${f(v)}</option>`).join('');if([...s.options].some(o=>o.value===prev))s.value=prev;}
+function refreshSelects(){const R=RES;for(const id of['p1Lay','p2Lay'])fill(id,R.variants,coilLabel);for(const id of['p1Len','p2Len','p3Len'])fill(id,R.lensL,v=>(v*1e3).toFixed(2)+' mm');fill('p3R',R.radii,v=>(v*1e3).toFixed(1)+' mm');}
+function render(){
+  const R=RES,C=R.configs,nF=C.filter(o=>o.feas).length,nT=C.filter(o=>!o.therm).length,ok=C.filter(o=>o.feas&&o.therm).sort((a,b)=>b.worst-a.worst),best=ok[0];
+  $('verdict').innerHTML=`<div class="${nF?'good':'bad'}"><b>${nF} / ${C.length}</b><span>${t('v.pos')}</span></div>
+  <div class="${nT?'warn':'good'}"><b>${nT}</b><span>${t('v.therm')}</span></div>
+  <div class="${ok.length?'good':'bad'}"><b>${ok.length}</b><span>${t('v.both')}</span></div>
+  <div>${best?`<b>r = ${(best.r*1e3).toFixed(1)} mm</b><span>${t('v.best',{lm:(best.lm*1e3).toFixed(2),coil:coilLabel(best.v),m:best.worst.toFixed(2),I:best.I.toFixed(2)})}</span>`:`<b>—</b><span>${t('v.none')}</span>`}</div>`;
+  draw1();draw2();draw3();table();
+}
+function draw1(){
+  const R=RES,v=parseFloat($('p1Lay').value),lm=parseFloat($('p1Len').value),S=[],Lg=[];
+  R.radii.forEach((r,i)=>{const tt=R.radii.length>1?i/(R.radii.length-1):.5,c=cfg(r,lm,v);if(!c)return;const xs=R.xsByR[r].map(x=>x*1e3),rl=(r*1e3).toFixed(1);
+    S.push({x:xs,y:R.req[r].F,color:ramp(tt,'r'),label:t('lg.req',{r:rl})});S.push({x:xs,y:c.av,color:ramp(tt,'a'),dash:true,label:t('lg.av',{r:rl})});
+    Lg.push({color:ramp(tt,'r'),label:t('lg.req',{r:rl})},{color:ramp(tt,'a'),dash:true,label:t('lg.av',{r:rl})});});
+  $('leg1').innerHTML=legendHTML(Lg);plot($('c1'),S,t('x.disp'),t('y.force'),{y0:true,xfmt:x=>x.toFixed(2)+' mm',yfmt:y=>y.toFixed(3)+' N'});
+  if(R.mode==='twosided'){const Vg=capVol(R.wPre,R.mb.a),xm=R.radii.map(r=>Vg/(Math.PI*r*r)*1e3);$('giveback').innerHTML=t('giveback',{v:(Vg*1e9).toFixed(1),xl:xm[xm.length-1].toFixed(2),xs:xm[0].toFixed(2)});}else $('giveback').innerHTML='';
+}
+function draw2(){
+  const R=RES,v=parseFloat($('p2Lay').value),lm=parseFloat($('p2Len').value);
+  const rs=R.radii.map(r=>r*1e3),m=R.radii.map(r=>{const c=cfg(r,lm,v);return c?c.worst:NaN;}),m0=R.radii.map((r,i)=>m[i]+R.req[r].k);
+  let bi=0;for(let i=1;i<m.length;i++)if(m[i]>m[bi])bi=i;
+  const S=[{x:rs,y:m0,color:'#9aa1ab',dash:true,label:t('s.without'),snap:true},{x:rs,y:m,color:'#1b2028',width:2.2,points:true,label:t('s.with'),snap:true,marker:[[rs[bi],m[bi],`r* ≈ ${rs[bi].toFixed(1)} mm`]]}];
+  $('leg2').innerHTML=legendHTML([{color:'#1b2028',label:t('lg.with')},{color:'#9aa1ab',dash:true,label:t('lg.without')}]);
+  plot($('c2'),S,t('x.radius'),t('y.margin'),{yzero:true,xfmt:x=>x.toFixed(1)+' mm',yfmt:y=>(y>=0?'+':'')+y.toFixed(3)+' N'});
+  const edge=(bi===0||bi===rs.length-1)&&rs.length>1,nf=Number.isFinite(m[bi]);
+  $('rstar').innerHTML=nf?t('rstar',{coil:coilLabel(v),lm:(lm*1e3).toFixed(2),r:rs[bi].toFixed(1),m:(m[bi]>=0?'+':'')+m[bi].toFixed(2)})+(edge?t('rstar.edge'):'')+(R.fric.k0===0&&R.fric.kc===0?t('rstar.nofric'):t('rstar.fric',{k0:R.fric.k0,kc:R.fric.kc})):'';
+}
+function draw3(){
+  const R=RES,r=parseFloat($('p3R').value),lm=parseFloat($('p3Len').value),xs=R.xsByR[r].map(x=>x*1e3),S=[{x:xs,y:R.req[r].F,color:'#1b2028',width:2.2,label:t('s.req')}],Lg=[{color:'#1b2028',label:t('lg.reqfull')}];
+  R.variants.forEach((v,i)=>{const c=cfg(r,lm,v);if(!c)return;const tt=R.variants.length>1?i/(R.variants.length-1):.5;S.push({x:xs,y:c.av,color:ramp(tt,'a'),label:coilLabel(v)});Lg.push({color:ramp(tt,'a'),label:t('lg.avv',{coil:coilLabel(v)})});});
+  $('leg3').innerHTML=legendHTML(Lg);plot($('c3'),S,t('x.disp'),t('y.force'),{y0:true,xfmt:x=>x.toFixed(2)+' mm',yfmt:y=>y.toFixed(3)+' N'});
+}
+function table(){
+  const R=RES,s=$('tblSort').value,rows=[...R.configs];
+  if(s==='margin')rows.sort((a,b)=>b.worst-a.worst);else if(s==='power')rows.sort((a,b)=>a.P-b.P);
+  $('tbl').querySelector('tbody').innerHTML=rows.map(o=>`<tr><td>${(o.r*1e3).toFixed(1)} mm (Ø${(o.r*2e3).toFixed(1)})</td><td>${(o.lm*1e3).toFixed(2)} mm</td><td>${coilLabel(o.v)}</td><td>${o.n.toFixed(0)}</td><td>${o.N}</td><td>${fmt(o.R,2)}</td><td>${fmt(o.I,2)}</td><td>${fmt(o.P,1)}</td><td>${fmt(o.dT,0)}</td><td>${fmt(o.Imax,2)}</td><td>${o.worst>=0?'+':''}${fmt(o.worst,2)}</td><td>${(o.xw*1e3).toFixed(1)}</td><td>${fmt(o.pend/1e3,1)}</td><td><span class="tag ${o.feas?'ok':'no'}">${o.feas?t('yes'):t('no')}</span></td><td><span class="tag ${o.therm?'ok':'hot'}">${o.therm?t('ok'):t('over')}</span></td></tr>`).join('');
+  $('tblnote').textContent=t('tbl.note',{n:rows.length,k0:R.fric.k0,kc:R.fric.kc});
+}
+$('csv').addEventListener('click',()=>{if(!RES)return;const h='radius_mm,diameter_mm,magnet_mm,coil,turns_per_m,N,R_ohm,I_A,P_W,dT_K,Imax_A,worst_margin_N,at_x_mm,p_end_kPa,feasible,thermal_ok,friction_k0_N,friction_c_N_per_mm\n';
+  const b=RES.configs.map(o=>[o.r*1e3,o.r*2e3,o.lm*1e3,o.v,o.n,o.N,o.R,o.I,o.P,o.dT,o.Imax,o.worst,o.xw*1e3,o.pend/1e3,o.feas,o.therm,RES.fric.k0,RES.fric.kc].map(v=>typeof v==='number'?+v.toPrecision(6):v).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([h+b],{type:'text/csv'}));a.download='zero_sum_feasibility.csv';a.click();});
+for(const id of['p1Lay','p1Len'])$(id).addEventListener('change',draw1);
+for(const id of['p2Lay','p2Len'])$(id).addEventListener('change',draw2);
+for(const id of['p3R','p3Len'])$(id).addEventListener('change',draw3);
+$('tblSort').addEventListener('change',table);
+$('run').addEventListener('click',run);
+applyLang();
+</script>
+</body>
+</html>
