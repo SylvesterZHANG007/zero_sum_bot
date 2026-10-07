@@ -75,8 +75,19 @@ tbody tr:hover td{background:#eef4f8}
 .readout{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.5}.readout b{color:var(--ink);font-weight:600}
 .actions{display:flex;gap:10px;margin-top:10px;align-items:center}
 .actions button{height:30px;padding:0 12px;border:1px solid var(--rule2);border-radius:5px;background:#fff;font:inherit;font-size:12.5px;cursor:pointer}
+.preset{padding:10px 0 10px;border-bottom:1px solid var(--rule)}
+.pwinfo{font-size:11.5px;color:var(--muted);line-height:1.45;margin:4px 0 2px}.pwinfo b{color:var(--bad);font-weight:600}
+.dyngrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 14px;margin:4px 0 10px}
+.dyngrid .check{margin:20px 0 0}
+.dynbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:2px 0 12px}
+.dynbar button{height:32px;padding:0 16px;border:0;border-radius:6px;background:var(--ink);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+.dynbar button:disabled{opacity:.5;cursor:default}
+.dynplots{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px}
+.dynplots h3{margin:8px 0 2px;font-size:12.5px;font-weight:600}
+.dynplots .wide{grid-column:1/-1}
+.dyntbl{margin-top:12px}
 .empty{color:var(--faint);font-size:13px;padding:22px 0;text-align:center;grid-column:1/-1}
-@media (max-width:980px){.wrap{grid-template-columns:1fr}aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--rule)}.verdict,.fric{grid-template-columns:1fr 1fr}header{flex-wrap:wrap;gap:6px}}
+@media (max-width:980px){.dyngrid{grid-template-columns:1fr 1fr}.dynplots{grid-template-columns:1fr}.wrap{grid-template-columns:1fr}aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--rule)}.verdict,.fric{grid-template-columns:1fr 1fr}header{flex-wrap:wrap;gap:6px}}
 @media (max-width:640px){.verdict,.fric{grid-template-columns:1fr}}
 </style>
 </head>
@@ -89,6 +100,7 @@ tbody tr:hover td{background:#eef4f8}
 
 <div class="wrap">
 <aside>
+  <div class="preset"><label for="preset" data-i18n="lbl.preset"></label><select id="preset"><option value="bench" data-i18n="opt.preset.bench"></option><option value="alex" data-i18n="opt.preset.alex"></option><option value="custom" data-i18n="opt.preset.custom"></option></select></div>
   <details open><summary data-i18n="sec.bore"></summary>
     <div class="row three">
       <div><label data-i18n="lbl.rmin"></label><input id="rmin" type="number" step="0.5" value="2.5"></div>
@@ -110,15 +122,42 @@ tbody tr:hover td{background:#eef4f8}
   </details>
 
   <details open><summary data-i18n="sec.coil"></summary>
-    <div class="row one"><div><label data-i18n="lbl.spec"></label><select id="coilSpec"><option value="layers" data-i18n="opt.spec.layers"></option><option value="turns" data-i18n="opt.spec.turns"></option></select></div></div>
-    <div class="row">
-      <div><label data-i18n="lbl.awg"></label><select id="awg"><option>30</option><option>32</option><option>34</option><option selected>36</option><option>38</option><option>40</option></select></div>
+    <div class="row one"><div><label data-i18n="lbl.spec"></label><select id="coilSpec"><option value="prewound" data-i18n="opt.spec.prewound"></option><option value="layers" data-i18n="opt.spec.layers"></option><option value="turns" data-i18n="opt.spec.turns"></option></select></div></div>
+    <div id="pwBox">
+      <div class="row three">
+        <div><label data-i18n="lbl.pwID"></label><input id="pwID" type="number" step="0.1" value="10"></div>
+        <div><label data-i18n="lbl.pwH"></label><input id="pwH" type="number" step="0.5" value="20"></div>
+        <div><label data-i18n="lbl.pwOD"></label><input id="pwOD" type="number" step="0.5" value="35"></div>
+      </div>
+      <div class="row three">
+        <div><label data-i18n="lbl.pwN"></label><input id="pwN" type="number" step="10" value="1000"></div>
+        <div><label data-i18n="lbl.pwWire"></label><input id="pwWire" type="number" step="0.01" value="0.35"></div>
+        <div><label data-i18n="lbl.pwBare"></label><input id="pwBare" type="number" step="0.01" value="0.32"></div>
+      </div>
+      <div class="row three">
+        <div><label data-i18n="lbl.pwFl"></label><input id="pwFl" type="number" step="0.1" value="1.0"></div>
+        <div><label data-i18n="lbl.pwBob"></label><input id="pwBob" type="number" step="0.1" value="0.5"></div>
+        <div><label data-i18n="lbl.pwR"></label><input id="pwR" type="number" step="0.1" value="13.0"></div>
+      </div>
+      <div class="pwinfo" id="pwInfo"></div>
+      <p class="hint" data-i18n="hint.pw"></p>
+    </div>
+    <div class="row" id="gaugeRow">
+      <div><label data-i18n="lbl.awg"></label><select id="awg"><option>26</option><option>28</option><option>30</option><option>32</option><option>34</option><option selected>36</option><option>38</option><option>40</option></select></div>
       <div id="layersBox"><label data-i18n="lbl.layers"></label><input id="layers" type="text" value="1, 4, 8, 14"></div>
       <div id="turnsBox" style="display:none"><label data-i18n="lbl.turns"></label><input id="turnsList" type="text" value="2000, 4000, 6000, 7100"></div>
     </div>
     <div class="row">
-      <div><label data-i18n="lbl.current"></label><input id="current" type="number" step="0.1" value="4.0"></div>
-      <div><label data-i18n="lbl.overlap"></label><input id="overlap" type="number" step="1" value="2"></div>
+      <div><label data-i18n="lbl.pitch"></label><input id="pitch" type="number" step="1" value="0"></div>
+      <div><label data-i18n="lbl.comm"></label><select id="comm"><option value="ahead" data-i18n="opt.comm.ahead"></option><option value="pushpull" data-i18n="opt.comm.pushpull"></option><option value="step" data-i18n="opt.comm.step"></option></select></div>
+    </div>
+    <div class="row">
+      <div><label data-i18n="lbl.drive"></label><select id="drive"><option value="current" data-i18n="opt.drive.current"></option><option value="supply" data-i18n="opt.drive.supply"></option></select></div>
+      <div id="supBox"><label data-i18n="lbl.supV"></label><input id="supV" type="number" step="0.5" value="10"></div>
+    </div>
+    <div class="row">
+      <div><label><span id="lblCur" data-i18n="lbl.current"></span><span id="lblLim" data-i18n="lbl.ilim"></span></label><input id="current" type="number" step="0.1" value="4.0"></div>
+      <div id="ovBox"><label data-i18n="lbl.overlap"></label><input id="overlap" type="number" step="1" value="2"></div>
     </div>
     <div class="row three">
       <div><label data-i18n="lbl.dtmax"></label><input id="dtmax" type="number" step="5" value="40"></div>
@@ -207,6 +246,35 @@ tbody tr:hover td{background:#eef4f8}
     <canvas id="c3" width="1100" height="360"></canvas>
   </section>
 
+  <section class="card" id="dynCard">
+    <div class="head"><div><h2><span data-i18n="dyn.title"></span> <span class="new" data-i18n="tag.new"></span></h2><p class="sub" data-i18n="dyn.sub"></p></div></div>
+    <div class="dyngrid">
+      <div><label data-i18n="dyn.mode"></label><select id="dynMode"><option value="step" data-i18n="opt.dyn.step"></option><option value="pushpull" data-i18n="opt.dyn.pushpull"></option><option value="ahead" data-i18n="opt.dyn.ahead"></option></select></div>
+      <div><label data-i18n="dyn.n"></label><input id="dynN" type="number" step="1" min="2" value="2"></div>
+      <div><label data-i18n="dyn.V"></label><input id="dynV" type="text" value="5, 7.5, 10, 12.5, 15"></div>
+      <div><label data-i18n="dyn.ilim"></label><input id="dynIlim" type="number" step="0.1" value="1.0"></div>
+      <div><label data-i18n="dyn.mu"></label><input id="dynMu" type="number" step="0.05" value="0.3"></div>
+      <div><label data-i18n="dyn.steps"></label><input id="dynSteps" type="number" step="1" min="1" value="2"></div>
+      <div><label data-i18n="dyn.ton"></label><input id="dynTon" type="number" step="10" min="0" value="0"></div>
+      <div><label data-i18n="dyn.mass"></label><input id="dynMass" type="number" step="0.1" min="0" value="0"></div>
+      <div><label data-i18n="dyn.L"></label><input id="dynL" type="number" step="0.5" min="0" value="0"></div>
+      <div><label data-i18n="dyn.tmax"></label><input id="dynTmax" type="number" step="1" min="0.1" value="6"></div>
+      <div><label data-i18n="dyn.win"></label><select id="dynWin"><option value="first" data-i18n="opt.win.first"></option><option value="all" data-i18n="opt.win.all"></option></select></div>
+      <label class="check"><input id="dynEmf" type="checkbox" checked> <span data-i18n="dyn.emf"></span></label>
+    </div>
+    <div class="dynbar"><button id="dynRun" data-i18n="dyn.run"></button><span class="readout" id="dynStatus" style="margin:0"></span></div>
+    <div class="readout" id="dynSum"></div>
+    <div class="dynplots">
+      <div class="wide"><h3 data-i18n="dyn.p1"></h3><div class="legend" id="dynLeg"></div><canvas id="d1" width="1100" height="300"></canvas></div>
+      <div><h3 data-i18n="dyn.p2"></h3><canvas id="d2" width="560" height="270"></canvas></div>
+      <div><h3 data-i18n="dyn.p3"></h3><canvas id="d3" width="560" height="270"></canvas></div>
+      <div><h3 data-i18n="dyn.p4"></h3><canvas id="d4" width="560" height="270"></canvas></div>
+      <div><h3 data-i18n="dyn.p5"></h3><canvas id="d5" width="560" height="270"></canvas></div>
+    </div>
+    <div class="tblwrap dyntbl"><table id="dynTbl"><thead><tr id="dynHead"></tr></thead><tbody></tbody></table></div>
+    <p class="readout" data-i18n="dyn.note"></p>
+  </section>
+
   <section class="card">
     <div class="head"><div><h2 data-i18n="tbl.title"></h2><p class="sub" data-i18n="tbl.sub"></p></div>
       <div class="controls"><span><span data-i18n="ctl.sort"></span> <select id="tblSort"><option value="default" data-i18n="sort.default"></option><option value="margin" data-i18n="sort.margin"></option><option value="power" data-i18n="sort.power"></option></select></span></div></div>
@@ -221,6 +289,7 @@ tbody tr:hover td{background:#eef4f8}
       <p data-i18n="notes.endcap"></p>
       <p data-i18n="notes.two"></p>
       <p data-i18n="notes.thermal"></p>
+      <p data-i18n="notes.dyn"></p>
       <p data-i18n="notes.not"></p>
     </div>
   </section>
@@ -230,7 +299,7 @@ tbody tr:hover td{background:#eef4f8}
 <script>
 /* ============ compute core (validated against Python reference) ============ */
 const MU0=4*Math.PI*1e-7, RHO_CU=1.72e-8, P_ATM=101325;
-const AWG_BARE={30:0.255e-3,32:0.202e-3,34:0.160e-3,36:0.127e-3,38:0.101e-3,40:0.0799e-3}, INS=1.085;
+const AWG_BARE={26:0.405e-3,28:0.321e-3,30:0.255e-3,32:0.202e-3,34:0.160e-3,36:0.127e-3,38:0.101e-3,40:0.0799e-3}, INS=1.085;
 function ellipKE(m){if(m<=0)return{K:Math.PI/2,E:Math.PI/2};if(m>=1)m=1-1e-14;let a=1,b=Math.sqrt(1-m),c=Math.sqrt(m),sum=.5*c*c,p=1;for(let i=0;i<40;i++){const an=.5*(a+b),bn=Math.sqrt(a*b);c=.5*(a-b);p*=2;sum+=.5*p*c*c;a=an;b=bn;if(c<1e-15)break;}const K=Math.PI/(2*a);return{K,E:K*(1-sum)};}
 function Mloop(a,b,d){const m=4*a*b/((a+b)*(a+b)+d*d),k=Math.sqrt(m),{K,E}=ellipKE(m);return MU0*Math.sqrt(a*b)*((2/k-k)*K-(2/k)*E);}
 function makeCoil(rBore,lMag,awg,layers,wall,gap,slices,pitchOverride){const wire=pitchOverride||AWG_BARE[awg]*INS,Rin=rBore+wall+gap,tpl=Math.max(1,Math.floor(lMag/wire)),N=tpl*layers,Rl=[];for(let j=0;j<layers;j++)Rl.push(Rin+(j+.5)*wire);const Rout=Rin+layers*wire,z=[],tpn=tpl/slices;for(let s=0;s<slices;s++)z.push(-lMag/2+(s+.5)*lMag/slices);const Aw=Math.PI*AWG_BARE[awg]**2/4;let wl=0;for(const r of Rl)wl+=tpl*2*Math.PI*r;const Relec=RHO_CU*wl/Aw,Asurf=2*Math.PI*Rout*lMag+2*Math.PI*(Rout*Rout-Rin*Rin);return{Rin,Rout,Rl,z,tpn,N,nAxial:N/lMag,Relec,Asurf,length:lMag,layers};}
@@ -244,6 +313,59 @@ function capVol(w,a){return Math.PI*w*(3*a*a+w*w)/6;}
 function chamber(V0,dV,a,t,mu,Jm,wPre){   const Vpre=capVol(wPre,a), Vfree=V0-dV-Vpre;   let lo2=1,hi2=1+Jm; for(let i=0;i<60;i++){const m=.5*(lo2+hi2);(2*m+1/(m*m)-3<Jm)?lo2=m:hi2=m;} const wLock=a*Math.sqrt(Math.max(lo2-1,1e-12));   let wl=-6*a,wh=wLock; for(let i=0;i<60;i++){const m=.5*(wl+wh);(Vfree+capVol(m,a)<=1e-4*V0)?wl=m:wh=m;} const wMin=wh;   const gas=w=>P_ATM*V0/(Vfree+capVol(w,a))-P_ATM;   const memb=w=>w>=0?gentCap(w,a,t,mu,Jm):-gentCap(-w,a,t,mu,Jm);   const res=w=>gas(w)-memb(w);   let lo=wMin,hi=0.999*wLock,flo=res(lo),fhi=res(hi);   if(!(flo>0)||!(fhi<0)){ return {p:Infinity,w0:hi,burst:true}; }   for(let i=0;i<80;i++){const mid=.5*(lo+hi),fm=res(mid);if(fm>0){lo=mid;flo=fm;}else hi=mid;}   const w=.5*(lo+hi); return {p:memb(w),w0:w,burst:false}; }
 function requiredCurve(mode,r,xs,mb,Lgas,Vdead,wPre){const A=Math.PI*r*r;return xs.map(x=>{if(mode==='single'){const c=chamber(A*Lgas+Vdead,A*x,mb.a,mb.t,mb.mu,mb.Jm,0);return{F:c.p*A,p:c.p,w0:c.w0};}const V0=A*Lgas/2+Vdead/2,ca=chamber(V0,A*x,mb.a,mb.t,mb.mu,mb.Jm,wPre),cb=chamber(V0,-A*x,mb.a,mb.t,mb.mu,mb.Jm,wPre);return{F:(ca.p-cb.p)*A,p:ca.p,w0:ca.w0};});}
 
+/* ---- v3: catalogue (pre-wound) coil. Inner radius and length come from the part; with a measured
+   resistance the layer spacing is fitted so the mean turn radius reproduces it. ---- */
+function makePrewound(p,slices){
+  const Rin=p.ID/2+p.bob,Lw=Math.max(1e-4,p.H-2*p.fl),tpl=Math.max(1,Math.floor(Lw/p.wire)),layers=Math.max(1,Math.ceil(p.N/tpl)),Aw=Math.PI*p.bare*p.bare/4;
+  let dr=p.wire,cal=false;
+  if(p.Rmeas>0){const Rm=p.Rmeas*Aw/(RHO_CU*p.N*2*Math.PI),d=2*(Rm-Rin)/layers;if(d>0){dr=d;cal=true;}}
+  const Rl=[];for(let j=0;j<layers;j++)Rl.push(Rin+(j+.5)*dr);
+  const z=[];for(let s=0;s<slices;s++)z.push(-Lw/2+(s+.5)*Lw/slices);
+  let wl=0;for(const r of Rl)wl+=(p.N/layers)*2*Math.PI*r;
+  const Rout=Rin+layers*dr,Ro=p.OD/2,ri=p.ID/2;
+  const c={Rin,Rout,Rl,z,tpn:(p.N/layers)/slices,N:p.N,nAxial:p.N/Lw,Relec:RHO_CU*wl/Aw,Asurf:2*Math.PI*Ro*p.H+2*Math.PI*(Ro*Ro-ri*ri),length:Lw,layers,tpl,dr,cal,overOD:Rout>Ro+1e-9,boreMax:ri};
+  c.Lind=wheeler(c);return c;
+}
+// Wheeler's multilayer inductance estimate (H); dimensions in metres.
+function wheeler(c){const r=(c.Rin+c.Rout)/2,d=c.Rout-c.Rin;return 31.6*c.N*c.N*r*r/(6*r+9*c.length+10*d)*1e-6;}
+// Available forward force along the stroke for three switching schemes.
+//  ahead   : the `ov` nearest coils ahead attract (original rule)
+//  pushpull: any coil may attract or repel; the `ov` coils with the largest pull are used
+//  step    : only the next coil ahead is on
+function availableCurve2(p,I,pitch,ov,xs,mode){
+  return xs.map(x=>{
+    if(mode==='pushpull'){const k0=Math.floor(x/pitch),fs=[];for(let k=k0-ov-1;k<=k0+ov+1;k++)fs.push(Math.abs(interp(p,x-k*pitch)));fs.sort((a,b)=>b-a);let f=0;for(let i=0;i<ov&&i<fs.length;i++)f+=fs[i];return f*I;}
+    const n=mode==='step'?1:ov,k0=Math.floor(x/pitch)+1;let f=0;for(let k=k0;k<k0+n;k++)f+=Math.abs(interp(p,x-k*pitch));return f*I;});
+}
+/* ---- v3: time-domain run. m·a = Σ s_k I_k f(x−x_k) − friction; each coil V = IR + L dI/dt + e,
+   e = s_k f(x−x_k)·v; CV/CC supply that cannot sink current; flyback diode when off. ---- */
+function simulateRun(o){
+  const {prof,xc,R,L,V,Ilim,m,mu,emf,mode,Ton,steps,tmax}=o,dt=2e-6,n=xc.length,Ff=mu*m*9.81;
+  const f=z=>interp(prof,z),dec=Math.exp(-R*dt/Math.max(L,1e-12));
+  let x=xc[0],v=0,t=0;const I=new Array(n).fill(0),on=new Array(n).fill(0),kk=new Array(n).fill(0);
+  const seq=[];if(mode==='step'){let k=0,dir=1;for(let i=0;i<steps;i++){if(k+dir<0||k+dir>n-1)dir=-dir;k+=dir;seq.push(k);}on[seq[0]]=1;}
+  let si=0,stepStart=0,settledSince=-1,Ein=0,done=false;const every=50,log=[],events=[];let it=0;
+  const target=()=>mode==='step'?xc[seq[Math.min(si,seq.length-1)]]:xc[n-1];
+  while(t<tmax&&!done){
+    if(mode!=='step'){for(let k=0;k<n;k++)on[k]=0;let ah=-1,bh=-1;for(let k=0;k<n;k++){if(xc[k]>x+1e-9&&(ah<0||xc[k]<xc[ah]))ah=k;if(xc[k]<=x+1e-9&&(bh<0||xc[k]>xc[bh]))bh=k;}
+      if(ah<0)on[n-1]=1;else{on[ah]=1;if(mode==='pushpull'&&bh>=0)on[bh]=-1;}}
+    let F=0;for(let k=0;k<n;k++){kk[k]=f(x-xc[k]);if(on[k])F+=on[k]*I[k]*kk[k];}
+    for(let k=0;k<n;k++){
+      if(on[k]){const e=emf?on[k]*kk[k]*v:0,Iss=(V-e)/R;let In=Iss+(I[k]-Iss)*dec;if(In>Ilim)In=Ilim;if(In<0)In=0;I[k]=In;Ein+=V*In*dt;}
+      else if(I[k]>0){const Iss=-(0.7+Math.abs(emf?kk[k]*v:0))/R;I[k]=Math.max(0,Iss+(I[k]-Iss)*dec);}
+    }
+    let a;if(Math.abs(v)<1e-5&&Math.abs(F)<=Ff){a=0;v=0;}else a=(F-Ff*Math.sign(Math.abs(v)<1e-5?F:v))/m;
+    const vn=v+a*dt;if(v!==0&&Math.sign(vn)!==Math.sign(v)&&Math.abs(F)<=Ff)v=0;else v=vn;
+    x+=v*dt;t+=dt;
+    if(it++%every===0){let It=0;for(let k=0;k<n;k++)It+=I[k];log.push([t,x,v,a,F,It]);}
+    const tg=target(),settled=Math.abs(x-tg)<0.3e-3&&Math.abs(v)<5e-3;
+    let next=false;
+    if(mode==='step'&&Ton>0)next=t-stepStart>=Ton;
+    else{if(settled){if(settledSince<0)settledSince=t;if(t-settledSince>=0.02)next=true;}else settledSince=-1;}
+    if(next){events.push({t,dur:t-stepStart});if(mode!=='step'){done=true;break;}on[seq[si]]=0;si++;if(si>=seq.length){done=true;break;}on[seq[si]]=1;stepStart=t;settledSince=-1;}
+  }
+  return {log,events,Ein,seq,completed:done};
+}
 
 /* ============ i18n ============ */
 const I18N={
@@ -319,6 +441,66 @@ zh:{
  'notes.thermal':'<b>热学。</b>稠态温升 ΔT = I²R·占空比/(h·A<sub>surf</sub>)，按线圈外表面自然对流估算。刻意从简：远超几百 K 的数值只表示"远远超限"，其目的是把会烧毁绕组的电流标记出来，而不是报告为可行。',
  'notes.not':'<b>未建模。</b>铁磁流体密封在气液界面的行为、磁铁偏轴旋转、涡流、导线温度系数、动力学与反电动势，以及端盖下游的一切。这是设计空间探索工具，不能替代硬件验证。'
 }};
+Object.assign(I18N.en,{
+ title:'Magnetic Piston Actuator — Feasibility Instrument v3',
+ 'header.desc':'Required force (Gent endcap + Boyle) against available force (exact finite coaxial solenoid) along the plunger stroke, with thermal, clearance, dead-volume, friction and two-sided extensions — now with catalogue coils, bench-supply drive, three switching schemes and a time-domain dynamics run.',
+ 'lbl.preset':'Start from','opt.preset.bench':'Bench hardware, Oct 2026 (Ø7 mm tube, 1000-turn coils)','opt.preset.alex':'Original tool defaults','opt.preset.custom':'Custom (edited)',
+ 'opt.spec.prewound':'Pre-wound coil (catalogue part)',
+ 'lbl.pwID':'Bobbin ID (mm)','lbl.pwH':'Height (mm)','lbl.pwOD':'Outside dia. (mm)','lbl.pwN':'Turns','lbl.pwWire':'Wire OD, enamelled (mm)','lbl.pwBare':'Bare copper (mm)','lbl.pwFl':'Flange (mm)','lbl.pwBob':'Bobbin wall (mm)','lbl.pwR':'Measured R (Ω), 0 = compute',
+ 'pw.info':'{layers} layers × {tpl} turns, winding {lw} mm long, OD {od} mm · R {R} Ω{cal} · L ≈ {L} mH (τ = {tau} ms) · tube must be ≤ Ø{bore} mm',
+ 'pw.cal':' (layer spacing fitted to measured R)','pw.over':' · <b>winding OD exceeds the catalogue OD: check turns, wire size or R</b>',
+ 'hint.pw':'Coil length and inner radius come from the part, not from the magnet or bore. Entering the measured resistance fits the layer spacing so that the mean turn radius reproduces it — the most reliable way to pin a commercial coil whose winding you cannot see.',
+ 'lbl.pitch':'Coil pitch, centre to centre (mm; 0 = touching)','lbl.comm':'Switching',
+ 'opt.comm.ahead':'Pull with coils ahead (original)','opt.comm.pushpull':'Push–pull (coil behind repels)','opt.comm.step':'Step: one coil at a time',
+ 'lbl.drive':'Drive','opt.drive.current':'Fixed current','opt.drive.supply':'Bench supply (V + current limit)','lbl.supV':'Supply voltage (V)','lbl.ilim':'Current limit (A)',
+ 'hint.coil':'In supply mode the current is min(V/R, limit), exactly as on a CV/CC bench supply. A single coil\'s pull is zero at its own centre; step mode therefore starts each move from the far tail of the next coil, which is its weakest point. Duty 1.0 is the conservative case of a coil holding the piston.',
+ 'hint.magnet':'Magnet OD = bore ID − 2 × clearance. In wire-gauge and turns modes the coil length equals the magnet length; a pre-wound coil keeps its own length. For stacked discs list the stack lengths (5 × 3.175 = 15.875 mm). The dynamics run uses the first length in the list.',
+ nofit:'Tube too big',pw:'Pre-wound, {n} turns',
+ 'dyn.title':'Dynamics: one run in time',
+ 'dyn.sub':'Motion of the magnet in an open tube (no pneumatic load yet): F = ma with the same exact force profile, coil inductance and back-EMF, a CV/CC bench supply and Coulomb friction. Uses the first bore radius, first magnet length and first coil variant from the sidebar, and the sidebar pitch; the magnet starts at rest in coil 1.',
+ 'dyn.mode':'Switching','opt.dyn.step':'Step: next coil on until settled (ping-pong)','opt.dyn.pushpull':'Push–pull, switched by position','opt.dyn.ahead':'Pull ahead, switched by position',
+ 'dyn.n':'Number of coils','dyn.V':'Supply voltages (V, list)','dyn.ilim':'Current limit (A)','dyn.mu':'Friction coefficient μ','dyn.steps':'Steps (step mode)','dyn.ton':'On-time per step (ms, 0 = until settled)','dyn.mass':'Magnet mass (g, 0 = from size)','dyn.L':'Inductance (mH, 0 = estimate)','dyn.tmax':'Time limit (s)','dyn.win':'Time window','opt.win.first':'First 150 ms','opt.win.all':'Whole run','dyn.emf':'Include back-EMF','dyn.run':'Run dynamics',
+ 'dyn.busy':'Running…','dyn.done':'Done in {dt} s.',
+ 'dyn.p1':'Static thrust against position (first move, steady current)','dyn.p2':'Position','dyn.p3':'Speed','dyn.p4':'Acceleration','dyn.p5':'Supply current',
+ 'dx.pos':'Magnet position (mm)','dy.force':'Force (N)','dx.tms':'Time (ms)','dx.ts':'Time (s)','dy.pos':'Position (mm)','dy.v':'Speed (m/s)','dy.a':'Acceleration (g)','dy.I':'Current (A)','dl.fric':'Sliding friction',
+ 'dyn.sum':'Magnet {m} g · coil R {R} Ω, L {L} mH · friction {ff} mN · {n} coils at {p} mm pitch · bore Ø{bore} mm, magnet Ø{dm} × {lm} mm.',
+ 'dyn.th':['Supply','I steady (A)','Static peak (N)','Start force (mN)','Peak force moving (N)','Peak accel (g)','To next centre (ms)','Peak speed (m/s)','Overshoot (mm)','Settle per move (ms)','Energy per move (J)','P per coil (W)'],
+ 'dyn.nost':'not settled','dyn.cc':'CC',
+ 'dyn.note':'Settled = within 0.3 mm of the target coil centre and slower than 5 mm/s for 20 ms. When the supply is current-limited (CC) it holds the current constant, so back-EMF no longer damps the motion and the magnet rings for longer. Energy per move is what the supply delivers while the coil is on; almost all of it is heat.',
+ 'notes.mag':'<b>Magnetics.</b> The magnet is a uniformly magnetised cylinder, equivalent to surface poles on its end faces. Force = (B<sub>r</sub>/μ₀)·I·[M(top face) − M(bottom face)], with M the exact mutual inductance between the multi-layer coil and a loop of the magnet\'s radius, in complete elliptic integrals. Cross-checked against an independent Python implementation to machine precision and against the original tool to about 1% on peaks. Switching: the original rule energises the nearest <i>overlap</i> coils ahead attractively; push–pull also lets coils behind repel and takes the <i>overlap</i> coils with the largest pull at each position; step energises only the next coil.',
+ 'notes.dyn':'<b>Dynamics.</b> m·a = Σ s<sub>k</sub> I<sub>k</sub> f(x − x<sub>k</sub>) − friction, with f the same force profile per amp. Each coil obeys V = IR + L dI/dt + e with back-EMF e = s<sub>k</sub> f(x − x<sub>k</sub>)·v (energy conservation); the supply clips at its current limit and cannot sink current; a switched-off coil discharges through a flyback diode. L defaults to Wheeler\'s multilayer estimate. Exact exponential step for the current, 2 µs mechanical step; agrees with a SciPy solution to 0.1%.',
+ 'notes.not':'<b>Not modelled.</b> Ferrofluid seal behaviour at a gas interface, magnet tilt and rotation, radial pull from an off-centre coil, eddy currents, the wire temperature coefficient (R rises about 0.4 %/K as a coil heats), and anything downstream of the endcap. The dynamics run has no pneumatic load yet.'
+});
+Object.assign(I18N.zh,{
+ title:'磁力活塞执行器 — 可行性分析仪 v3',
+ 'header.desc':'沿活塞行程比较所需力（Gent 超弹性端盖 + 玻意耳定律）与可用力（精确有限共轴螺线管模型），含热学、间隙、死体积、摩擦与双侧零和扩展；v3 新增成品线圈、稳压电源驱动、三种换向方式与时域动力学。',
+ 'lbl.preset':'参数预设','opt.preset.bench':'2026年10月台架硬件（Ø7 mm 管，1000 匝线圈）','opt.preset.alex':'原工具默认值','opt.preset.custom':'自定义（已修改）',
+ 'opt.spec.prewound':'成品线圈（按商品参数）',
+ 'lbl.pwID':'骨架内径 (mm)','lbl.pwH':'高度 (mm)','lbl.pwOD':'外径 (mm)','lbl.pwN':'匝数','lbl.pwWire':'漆包线外径 (mm)','lbl.pwBare':'裸铜线径 (mm)','lbl.pwFl':'挡板厚 (mm)','lbl.pwBob':'骨架壁厚 (mm)','lbl.pwR':'实测电阻 (Ω)，0 = 计算',
+ 'pw.info':'{layers} 层 × {tpl} 匝，绕组长 {lw} mm，外径 {od} mm · R {R} Ω{cal} · L ≈ {L} mH（τ = {tau} ms）· 管外径须 ≤ Ø{bore} mm',
+ 'pw.cal':'（层间距已按实测电阻拟合）','pw.over':' · <b>绕组外径超过商品外径：请检查匝数、线径或电阻</b>',
+ 'hint.pw':'线圈长度与内半径由零件本身决定，与磁铁和缸径无关。填入实测电阻后，层间距会被拟合到使平均匝半径与之吻合——这是确定看不到内部绕法的商品线圈最可靠的办法。',
+ 'lbl.pitch':'线圈中心距 (mm；0 = 紧挨)','lbl.comm':'换向方式',
+ 'opt.comm.ahead':'只用前方线圈吸（原规则）','opt.comm.pushpull':'前拉后推（后方线圈排斥）','opt.comm.step':'步进：每次只通一个线圈',
+ 'lbl.drive':'驱动方式','opt.drive.current':'固定电流','opt.drive.supply':'实验室电源（电压 + 限流）','lbl.supV':'电源电压 (V)','lbl.ilim':'限流值 (A)',
+ 'hint.coil':'电源模式下电流 = min(V/R, 限流)，与恒压/恒流电源的行为一致。单个线圈在自身中心处出力为零，所以步进模式每一步都从下一个线圈最弱的远端尾部起步。占空比 1.0 为线圈持续保持活塞的保守情形。',
+ 'hint.magnet':'磁铁外径 = 缸体内径 − 2 × 间隙。线径/匝数模式下线圈长度等于磁铁长度；成品线圈保留自身长度。叠片磁铁请填叠后长度（5 × 3.175 = 15.875 mm）。动力学计算使用列表中第一个长度。',
+ nofit:'管子穿不过',pw:'成品线圈 {n} 匝',
+ 'dyn.title':'动力学：时域单次运行',
+ 'dyn.sub':'磁铁在两端开口管中的运动（暂不含气动负载）：用同一套精确力剖面做 F = ma，并计入线圈电感与反电动势、恒压/恒流电源和库仑摩擦。使用侧栏中第一个缸体半径、第一个磁铁长度、第一种线圈和侧栏的线圈中心距；磁铁从线圈 1 中心静止出发。',
+ 'dyn.mode':'换向方式','opt.dyn.step':'步进：下一个线圈通电直到停稳（来回）','opt.dyn.pushpull':'前拉后推，按位置换向','opt.dyn.ahead':'只用前方吸，按位置换向',
+ 'dyn.n':'线圈数','dyn.V':'电源电压 (V，列表)','dyn.ilim':'限流值 (A)','dyn.mu':'摩擦系数 μ','dyn.steps':'步数（步进模式）','dyn.ton':'每步通电时间 (ms，0 = 直到停稳)','dyn.mass':'磁铁质量 (g，0 = 按尺寸算)','dyn.L':'电感 (mH，0 = 估算)','dyn.tmax':'时间上限 (s)','dyn.win':'时间窗口','opt.win.first':'前 150 ms','opt.win.all':'全过程','dyn.emf':'计入反电动势','dyn.run':'运行动力学',
+ 'dyn.busy':'计算中…','dyn.done':'完成，用时 {dt} s。',
+ 'dyn.p1':'静态推力随位置变化（第一步，稳态电流）','dyn.p2':'位置','dyn.p3':'速度','dyn.p4':'加速度','dyn.p5':'电源电流',
+ 'dx.pos':'磁铁位置 (mm)','dy.force':'力 (N)','dx.tms':'时间 (ms)','dx.ts':'时间 (s)','dy.pos':'位置 (mm)','dy.v':'速度 (m/s)','dy.a':'加速度 (g)','dy.I':'电流 (A)','dl.fric':'滑动摩擦',
+ 'dyn.sum':'磁铁 {m} g · 线圈 R {R} Ω，L {L} mH · 摩擦 {ff} mN · {n} 个线圈，中心距 {p} mm · 缸径 Ø{bore} mm，磁铁 Ø{dm} × {lm} mm。',
+ 'dyn.th':['电源','稳态电流 (A)','静态峰值 (N)','起步力 (mN)','运动中峰值力 (N)','峰值加速度 (g)','到下一中心 (ms)','峰值速度 (m/s)','过冲 (mm)','每步停稳 (ms)','每步能耗 (J)','每线圈功率 (W)'],
+ 'dyn.nost':'未停稳','dyn.cc':'恒流',
+ 'dyn.note':'停稳 = 距目标线圈中心 0.3 mm 以内且速度低于 5 mm/s 并保持 20 ms。电源进入恒流（CC）后电流被锁定，反电动势不再提供阻尼，磁铁会振荡更久。每步能耗是线圈通电期间电源输出的能量，几乎全部变成热。',
+ 'notes.mag':'<b>磁力。</b>磁铁视为均匀磁化圆柱，等效于两端面上的面磁荷。力 = (B<sub>r</sub>/μ₀)·I·[M(顶面) − M(底面)]，M 为多层线圈与磁铁半径圆环之间的精确互感（完全椭圆积分）。已与独立 Python 实现对到机器精度，与原工具峰值相差约 1%。换向：原规则让前方最近的 <i>overlap</i> 个线圈以吸引极性通电；前拉后推允许后方线圈排斥，并在每个位置选出拉力最大的 <i>overlap</i> 个线圈；步进只通下一个线圈。',
+ 'notes.dyn':'<b>动力学。</b>m·a = Σ s<sub>k</sub> I<sub>k</sub> f(x − x<sub>k</sub>) − 摩擦，f 为同一套每安培力剖面。每个线圈满足 V = IR + L dI/dt + e，反电动势 e = s<sub>k</sub> f(x − x<sub>k</sub>)·v（能量守恒）；电源在限流值处钳位且不能吸收电流；断电线圈经续流二极管放电。L 默认用 Wheeler 多层线圈公式估算。电流用精确指数步进，机械步长 2 µs；与 SciPy 解相差 0.1%。',
+ 'notes.not':'<b>未建模。</b>铁磁流体密封在气液界面的行为、磁铁倾斜与旋转、线圈偏心带来的径向吸力、涡流、导线温度系数（线圈发热时 R 约升 0.4 %/K），以及端盖下游的一切。动力学计算暂不含气动负载。'
+});
 let LANG=(navigator.language||'').toLowerCase().startsWith('zh')?'zh':'en';
 function t(k,p){let s=I18N[LANG][k];if(s===undefined)s=I18N.en[k];if(typeof s!=='string')return s;if(p)for(const q in p)s=s.split('{'+q+'}').join(p[q]);return s;}
 function applyLang(){
@@ -326,6 +508,8 @@ function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(el=>{const v=t(el.dataset.i18n);if(v===undefined)return;if(el.tagName==='TITLE')el.textContent=v.replace(/<[^>]+>/g,'');else el.innerHTML=v;});
   $('langEn').classList.toggle('on',LANG==='en');$('langZh').classList.toggle('on',LANG==='zh');
   $('thead').innerHTML=t('th').map(h=>`<th>${h}</th>`).join('');
+  $('dynHead').innerHTML=t('dyn.th').map(h=>`<th>${h}</th>`).join('');
+  if(typeof pwInfo==='function')pwInfo();if(DYN)drawDyn();
   if(!RES)$('status').textContent=t('status.init');
   else{ $('status').textContent=t('status.done',{dt:(RES.dt/1000).toFixed(1),nr:RES.radii.length,nl:RES.lensL.length,nv:RES.variants.length}); refreshSelects(); render(false); }
 }
@@ -335,18 +519,35 @@ const $=id=>document.getElementById(id);
 const num=id=>parseFloat($(id).value);
 const list=id=>$(id).value.split(',').map(s=>parseFloat(s.trim())).filter(v=>isFinite(v)&&v>0);
 const fmt=(v,d=2)=>isFinite(v)?v.toFixed(d):'—';
-let RES=null;
+let RES=null,DYN=null;
 
 $('langEn').addEventListener('click',()=>{LANG='en';applyLang();});
 $('langZh').addEventListener('click',()=>{LANG='zh';applyLang();});
-$('coilSpec').addEventListener('change',()=>{const tt=$('coilSpec').value==='turns';$('layersBox').style.display=tt?'none':'';$('turnsBox').style.display=tt?'':'none';});
-$('mode').addEventListener('change',()=>{$('preRow').style.display=$('mode').value==='twosided'?'':'none';});
+function syncVis(){const sp=$('coilSpec').value,tt=sp==='turns';$('pwBox').style.display=sp==='prewound'?'':'none';$('gaugeRow').style.display=sp==='prewound'?'none':'';$('layersBox').style.display=tt?'none':'';$('turnsBox').style.display=tt?'':'none';
+  $('ovBox').style.visibility=$('comm').value==='step'?'hidden':'';const sup=$('drive').value==='supply';$('supBox').style.visibility=sup?'':'hidden';$('lblCur').style.display=sup?'none':'';$('lblLim').style.display=sup?'':'none';
+  $('preRow').style.display=$('mode').value==='twosided'?'':'none';pwInfo();}
+for(const id of['coilSpec','comm','drive','mode'])$(id).addEventListener('change',syncVis);
+function readPw(){return{ID:num('pwID')*1e-3,H:num('pwH')*1e-3,OD:num('pwOD')*1e-3,N:Math.max(1,Math.round(num('pwN'))),wire:num('pwWire')*1e-3,bare:num('pwBare')*1e-3,fl:num('pwFl')*1e-3,bob:num('pwBob')*1e-3,Rmeas:num('pwR')||0};}
+function pwInfo(){const p=readPw();if(!(p.ID>0&&p.H>0&&p.wire>0&&p.bare>0)){$('pwInfo').innerHTML='';return;}const c=makePrewound(p,4);
+  $('pwInfo').innerHTML=t('pw.info',{layers:c.layers,tpl:c.tpl,lw:(c.length*1e3).toFixed(1),od:(2*c.Rout*1e3).toFixed(1),R:c.Relec.toFixed(2),cal:c.cal?t('pw.cal'):'',L:(c.Lind*1e3).toFixed(2),tau:(c.Lind/c.Relec*1e3).toFixed(2),bore:(2*c.boreMax*1e3).toFixed(1)})+(c.overOD?t('pw.over'):'');}
+for(const id of['pwID','pwH','pwOD','pwN','pwWire','pwBare','pwFl','pwBob','pwR'])$(id).addEventListener('input',pwInfo);
+/* presets */
+const PRESETS={
+ bench:{rmin:3.5,rmax:3.5,rn:1,stroke:40,strokeUnit:'mm',lgas:43,vdead:0.02,mode:'single',wpre:5,coilSpec:'prewound',pwID:10,pwH:20,pwOD:35,pwN:1000,pwWire:0.35,pwBare:0.32,pwFl:1.0,pwBob:0.5,pwR:13.0,awg:'28',layers:'20',turnsList:'50000',pitch:35,comm:'step',drive:'supply',supV:10,current:1.0,overlap:1,dtmax:40,hconv:15,duty:0.5,clamp:false,br:1.48,lmag:'15.875, 12.7, 9.525, 6.35, 3.175',clear:0.325,gap:0.5,wall:1.0,a:7.7,t:0.5,mu:21,jm:16.92,slices:30,npro:401,nx:180,
+   dynMode:'step',dynN:2,dynV:'5, 7.5, 10, 12.5, 15',dynIlim:1.0,dynMu:0.3,dynSteps:2,dynTon:0,dynMass:0,dynL:0,dynTmax:6,dynEmf:true},
+ alex:{rmin:2.5,rmax:15,rn:6,stroke:200,strokeUnit:'mm',lgas:200,vdead:0,mode:'single',wpre:5,coilSpec:'layers',awg:'36',layers:'1, 4, 8, 14',turnsList:'2000, 4000, 6000, 7100',pitch:0,comm:'ahead',drive:'current',supV:10,current:4.0,overlap:2,dtmax:40,hconv:15,duty:1.0,clamp:false,br:1.48,lmag:'3.2, 6.35, 9.5, 12.7',clear:0,gap:0.25,wall:1.0,a:25,t:2.5,mu:59.8,jm:16.92,slices:30,npro:161,nx:180}
+};
+let APPLYING=false;
+function applyPreset(name){const P=PRESETS[name];if(!P)return;APPLYING=true;for(const k in P){const el=$(k);if(!el)continue;if(el.type==='checkbox')el.checked=!!P[k];else el.value=P[k];}APPLYING=false;syncVis();}
+$('preset').addEventListener('change',()=>applyPreset($('preset').value));
+document.querySelector('aside').addEventListener('input',e=>{if(!APPLYING&&e.target.id!=='preset')$('preset').value='custom';});
+document.querySelector('aside').addEventListener('change',e=>{if(!APPLYING&&e.target.id!=='preset')$('preset').value='custom';});
 function bind(slider,box){slider.addEventListener('input',()=>{box.value=slider.value;onFriction();});box.addEventListener('input',()=>{if(box.value!=='')slider.value=Math.min(parseFloat(slider.max),parseFloat(box.value));onFriction();});}
 bind($('k0s'),$('k0'));bind($('kcs'),$('kc'));
 function onFriction(){if(RES){applyFriction();render(false);}}
 
 function ramp(tt,which){const A=[[173,205,220],[43,111,143],[15,52,72]],R=[[232,190,165],[181,80,42],[92,36,16]];const c=which==='a'?A:R;const seg=tt<.5?[c[0],c[1],tt*2]:[c[1],c[2],(tt-.5)*2];const m=seg[0].map((v,i)=>Math.round(v+(seg[1][i]-v)*seg[2]));return `rgb(${m[0]},${m[1]},${m[2]})`;}
-const coilLabel=v=>RES&&RES.coilSpec==='turns'?t('turns',{n:v}):t(v>1?'layersP':'layers',{n:v});
+const coilLabel=v=>RES&&RES.coilSpec==='prewound'?t('pw',{n:RES.pwN}):RES&&RES.coilSpec==='turns'?t('turns',{n:v}):t(v>1?'layersP':'layers',{n:v});
 
 /* ---- plotting with hover ---- */
 function nice(lo,hi,n){const r=hi-lo||1,raw=r/n,p=Math.pow(10,Math.floor(Math.log10(raw))),m=raw/p,st=(m<1.5?1:m<3.5?2:m<7.5?5:10)*p,out=[];for(let v=Math.ceil(lo/st)*st;v<=hi+1e-9;v+=st)out.push(+v.toFixed(10));return out;}
@@ -405,7 +606,8 @@ function compute(){
   const rmin=num('rmin')*1e-3,rmax=num('rmax')*1e-3,rn=Math.max(1,Math.round(num('rn')));
   const radii=[];for(let i=0;i<rn;i++)radii.push(rn===1?rmin:rmin+(rmax-rmin)*i/(rn-1));
   const strokeIn=num('stroke'),strokeUnit=$('strokeUnit').value,Lgas=num('lgas')*1e-3,Vdead=num('vdead')*1e-6,mode=$('mode').value,wPre=num('wpre')*1e-3;
-  const awg=parseInt($('awg').value),coilSpec=$('coilSpec').value,variants=coilSpec==='turns'?list('turnsList'):list('layers').map(Math.round),I0=num('current'),ov=Math.max(1,Math.round(num('overlap')));
+  const awg=parseInt($('awg').value),coilSpec=$('coilSpec').value,variants=coilSpec==='prewound'?[1]:coilSpec==='turns'?list('turnsList'):list('layers').map(Math.round),I0=num('current'),comm=$('comm').value,ov=comm==='step'?1:Math.max(1,Math.round(num('overlap')));
+  const drive=$('drive').value,supV=num('supV'),pitchIn=(num('pitch')||0)*1e-3,pw=coilSpec==='prewound'?readPw():null;
   const dTmax=num('dtmax'),h=num('hconv'),duty=num('duty'),clamp=$('clamp').checked;
   const Br=num('br'),lensL=list('lmag').map(v=>v*1e-3),clear=num('clear')*1e-3,gap=num('gap')*1e-3,wall=num('wall')*1e-3;
   const mb={a:num('a')*1e-3,t:num('t')*1e-3,mu:num('mu')*1e3,Jm:num('jm')};
@@ -417,20 +619,23 @@ function compute(){
     const rc=requiredCurve(mode,r,xs,mb,Lgas,Vdead,wPre);reqRaw[r]={F:rc.map(o=>o.F),p:rc.map(o=>o.p)};
     for(const lm of lensL)for(const v of variants){
       const rMag=Math.max(1e-4,r-clear);
-      const coil=coilSpec==='turns'?makeCoil(r,lm,awg,1,wall,gap,slices,1/v):makeCoil(r,lm,awg,v,wall,gap,slices);
-      const prof=localProfile(coil,Br,rMag,lm,2.2*lm,npro);
-      const Imax=Math.sqrt(dTmax*h*coil.Asurf/(coil.Relec*duty)),I=clamp?Math.min(I0,Imax):I0;
-      const av=availableCurve(prof,I,lm,ov,xs);
-      configs.push({r,lm,v,n:coil.nAxial,N:coil.N,R:coil.Relec,I,P:I*I*coil.Relec,dT:I*I*coil.Relec*duty/(h*coil.Asurf),Imax,therm:I<=Imax+1e-9,av,pend:reqRaw[r].p[nx]});
+      const coil=pw?makePrewound(pw,slices):coilSpec==='turns'?makeCoil(r,lm,awg,1,wall,gap,slices,1/v):makeCoil(r,lm,awg,v,wall,gap,slices);
+      const fits=!pw||r+wall<=pw.ID/2+1e-12,pitch=pitchIn>0?pitchIn:coil.length;
+      const span=Math.max(2.2*lm,(ov+1.5)*pitch,coil.length+lm),npts=Math.max(npro,Math.min(1201,Math.round(2*span/0.15e-3))|1);
+      const prof=fits?localProfile(coil,Br,rMag,lm,span,npts):null;
+      const Idrv=drive==='supply'?Math.min(I0,supV/coil.Relec):I0;
+      const Imax=Math.sqrt(dTmax*h*coil.Asurf/(coil.Relec*duty)),I=clamp?Math.min(Idrv,Imax):Idrv;
+      const av=fits?availableCurve2(prof,I,pitch,ov,xs,comm):xs.map(()=>NaN);
+      configs.push({r,lm,v,n:coil.nAxial,N:coil.N,R:coil.Relec,I,P:I*I*coil.Relec,dT:I*I*coil.Relec*duty/(h*coil.Asurf),Imax,therm:I<=Imax+1e-9,av,pend:reqRaw[r].p[nx],fits,pitch});
     }
   }
-  RES={radii,lensL,variants,xsByR,reqRaw,configs,mode,wPre,mb,coilSpec,dt:performance.now()-t0};
+  RES={radii,lensL,variants,xsByR,reqRaw,configs,mode,wPre,mb,coilSpec,pwN:pw?pw.N:0,dt:performance.now()-t0};
   applyFriction();$('status').textContent=t('status.done',{dt:(RES.dt/1000).toFixed(1),nr:radii.length,nl:lensL.length,nv:variants.length});refreshSelects();render(true);
 }
 function applyFriction(){
   const R=RES,k0=num('k0')||0,kc=num('kc')||0;R.fric={k0,kc};R.req={};
   for(const r of R.radii){const k=k0+kc*r*1e3;R.req[r]={F:R.reqRaw[r].F.map(v=>v+k),k};}
-  for(const c of R.configs){const rq=R.req[c.r].F;let wi=0,best=Infinity;c.marg=c.av.map((v,i)=>{const m=v-rq[i];if(m<best){best=m;wi=i;}return m;});c.worst=best;c.xw=R.xsByR[c.r][wi];c.feas=best>0;}
+  for(const c of R.configs){if(!c.fits){c.marg=c.av;c.worst=NaN;c.xw=NaN;c.feas=false;continue;}const rq=R.req[c.r].F;let wi=0,best=Infinity;c.marg=c.av.map((v,i)=>{const m=v-rq[i];if(m<best){best=m;wi=i;}return m;});c.worst=best;c.xw=R.xsByR[c.r][wi];c.feas=best>0;}
 }
 function cfg(r,lm,v){return RES.configs.find(c=>c.r===r&&c.lm===lm&&c.v===v);}
 
@@ -470,8 +675,8 @@ function draw3(){
 }
 function table(){
   const R=RES,s=$('tblSort').value,rows=[...R.configs];
-  if(s==='margin')rows.sort((a,b)=>b.worst-a.worst);else if(s==='power')rows.sort((a,b)=>a.P-b.P);
-  $('tbl').querySelector('tbody').innerHTML=rows.map(o=>`<tr><td>${(o.r*1e3).toFixed(1)} mm (Ø${(o.r*2e3).toFixed(1)})</td><td>${(o.lm*1e3).toFixed(2)} mm</td><td>${coilLabel(o.v)}</td><td>${o.n.toFixed(0)}</td><td>${o.N}</td><td>${fmt(o.R,2)}</td><td>${fmt(o.I,2)}</td><td>${fmt(o.P,1)}</td><td>${fmt(o.dT,0)}</td><td>${fmt(o.Imax,2)}</td><td>${o.worst>=0?'+':''}${fmt(o.worst,2)}</td><td>${(o.xw*1e3).toFixed(1)}</td><td>${fmt(o.pend/1e3,1)}</td><td><span class="tag ${o.feas?'ok':'no'}">${o.feas?t('yes'):t('no')}</span></td><td><span class="tag ${o.therm?'ok':'hot'}">${o.therm?t('ok'):t('over')}</span></td></tr>`).join('');
+  if(s==='margin')rows.sort((a,b)=>(isFinite(b.worst)?b.worst:-1e9)-(isFinite(a.worst)?a.worst:-1e9));else if(s==='power')rows.sort((a,b)=>a.P-b.P);
+  $('tbl').querySelector('tbody').innerHTML=rows.map(o=>`<tr><td>${(o.r*1e3).toFixed(1)} mm (Ø${(o.r*2e3).toFixed(1)})</td><td>${(o.lm*1e3).toFixed(2)} mm</td><td>${coilLabel(o.v)}</td><td>${o.n.toFixed(0)}</td><td>${o.N}</td><td>${fmt(o.R,2)}</td><td>${fmt(o.I,2)}</td><td>${fmt(o.P,1)}</td><td>${fmt(o.dT,0)}</td><td>${fmt(o.Imax,2)}</td><td>${o.worst>=0?'+':''}${fmt(o.worst,2)}</td><td>${fmt(o.xw*1e3,1)}</td><td>${fmt(o.pend/1e3,1)}</td><td><span class="tag ${o.feas?'ok':'no'}">${!o.fits?t('nofit'):o.feas?t('yes'):t('no')}</span></td><td><span class="tag ${o.therm?'ok':'hot'}">${o.therm?t('ok'):t('over')}</span></td></tr>`).join('');
   $('tblnote').textContent=t('tbl.note',{n:rows.length,k0:R.fric.k0,kc:R.fric.kc});
 }
 $('csv').addEventListener('click',()=>{if(!RES)return;const h='radius_mm,diameter_mm,magnet_mm,coil,turns_per_m,N,R_ohm,I_A,P_W,dT_K,Imax_A,worst_margin_N,at_x_mm,p_end_kPa,feasible,thermal_ok,friction_k0_N,friction_c_N_per_mm\n';
@@ -482,6 +687,69 @@ for(const id of['p2Lay','p2Len'])$(id).addEventListener('change',draw2);
 for(const id of['p3R','p3Len'])$(id).addEventListener('change',draw3);
 $('tblSort').addEventListener('change',table);
 $('run').addEventListener('click',run);
+/* ---- v3: dynamics panel ---- */
+function dynSetup(){
+  const coilSpec=$('coilSpec').value,slices=Math.max(6,Math.round(num('slices')));
+  const r=num('rmin')*1e-3,lm=list('lmag')[0]*1e-3,Br=num('br'),clear=num('clear')*1e-3,wall=num('wall')*1e-3,gap=num('gap')*1e-3,awg=parseInt($('awg').value);
+  if(!(lm>0))throw new Error('magnet length');
+  const pw=coilSpec==='prewound'?readPw():null;
+  const coil=pw?makePrewound(pw,slices):coilSpec==='turns'?makeCoil(r,lm,awg,1,wall,gap,slices,1/list('turnsList')[0]):makeCoil(r,lm,awg,Math.round(list('layers')[0]),wall,gap,slices);
+  if(pw&&r+wall>pw.ID/2+1e-12)throw new Error(t('nofit'));
+  const pitch=(num('pitch')||0)>0?num('pitch')*1e-3:coil.length,n=Math.max(2,Math.round(num('dynN')));
+  const rMag=Math.max(1e-4,r-clear),Lmh=num('dynL')||0,L=Lmh>0?Lmh*1e-3:(coil.Lind||wheeler(coil));
+  const mass=(num('dynMass')||0)>0?num('dynMass')*1e-3:Math.PI*rMag*rMag*lm*7500;
+  const span=n*pitch+coil.length+lm,npts=Math.min(2001,Math.round(2*span/0.1e-3))|1;
+  const prof=localProfile(coil,Br,rMag,lm,span,npts);
+  const xc=[];for(let k=0;k<n;k++)xc.push(k*pitch);
+  return{coil,pitch,n,rMag,r,lm,L,mass,prof,xc,R:coil.Relec};
+}
+function runDyn(){const b=$('dynRun');b.disabled=true;$('dynStatus').textContent=t('dyn.busy');
+  setTimeout(()=>{try{const t0=performance.now();computeDyn();$('dynStatus').textContent=t('dyn.done',{dt:((performance.now()-t0)/1000).toFixed(1)});}catch(e){$('dynStatus').textContent=t('status.err')+e.message;console.error(e);}b.disabled=false;},20);}
+function computeDyn(){
+  const S=dynSetup(),Vs=list('dynV'),Ilim=num('dynIlim'),mu=num('dynMu'),mode=$('dynMode').value,steps=Math.max(1,Math.round(num('dynSteps'))),Ton=(num('dynTon')||0)*1e-3,tmax=Math.max(0.1,num('dynTmax')),emf=$('dynEmf').checked;
+  if(!Vs.length)throw new Error(t('dyn.V'));
+  const runs=Vs.map(V=>{
+    const res=simulateRun({prof:S.prof,xc:S.xc,R:S.R,L:S.L,V,Ilim,m:S.mass,mu,emf,mode,Ton,steps,tmax});
+    const Iss=Math.min(V/S.R,Ilim),x1=S.xc[1],lg=res.log;
+    let tc=NaN,Fa=0,aa=0,vmax=0,xmax=-Infinity;const tEnd1=mode==='step'&&res.events.length?res.events[0].t:Infinity;
+    for(const q of lg){if(isNaN(tc)){if(q[1]>=x1)tc=q[0];else{Fa=Math.max(Fa,q[4]);aa=Math.max(aa,q[3]);}}vmax=Math.max(vmax,Math.abs(q[2]));if(q[0]<=tEnd1)xmax=Math.max(xmax,q[1]);}
+    const xo=xmax-(mode==='step'?x1:S.xc[S.n-1]);
+    let pk=0;for(const F of S.prof.F)pk=Math.max(pk,Math.abs(F));
+    const startF=Math.abs(interp(S.prof,-S.pitch))*Iss;
+    const nEv=res.events.length,settle=nEv?res.events.reduce((a,e)=>a+e.dur,0)/nEv:NaN;
+    return{V,Iss,cc:V/S.R>Ilim,peak:pk*Iss,startF,Fa,aa,tc,vmax,xo,settle,complete:res.completed,E:nEv?res.Ein/nEv:NaN,P:Iss*Iss*S.R,log:res.log};
+  });
+  DYN={S,runs,mode,mu,Ilim};drawDyn();
+}
+function drawDyn(){
+  const D=DYN,S=D.S,N=D.runs.length,col=i=>ramp(N>1?0.15+0.85*i/(N-1):.6,'a');
+  const ff=D.mu*S.mass*9.81;
+  $('dynSum').innerHTML=t('dyn.sum',{m:(S.mass*1e3).toFixed(2),R:S.R.toFixed(2),L:(S.L*1e3).toFixed(2),ff:(ff*1e3).toFixed(1),n:S.n,p:(S.pitch*1e3).toFixed(1),bore:(2*S.r*1e3).toFixed(2),dm:(2*S.rMag*1e3).toFixed(2),lm:(S.lm*1e3).toFixed(2)});
+  const vlab=r=>`${r.V} V → ${r.Iss.toFixed(2)} A${r.cc?' ('+t('dyn.cc')+')':''}`;
+  $('dynLeg').innerHTML=legendHTML(D.runs.map((r,i)=>({color:col(i),label:vlab(r)})).concat([{color:'#a83232',dash:true,label:t('dl.fric')}]));
+  // static thrust vs position for the first move
+  const x0=S.xc[0]-S.pitch,x1=S.xc[S.n-1]+S.pitch,xs=[];for(let i=0;i<=600;i++)xs.push(x0+(x1-x0)*i/600);
+  const S1=D.runs.map((r,i)=>({x:xs.map(x=>x*1e3),y:xs.map(x=>{let F=0;
+      if(D.mode==='step')F=interp(S.prof,x-S.xc[1]);
+      else{let ah=-1,bh=-1;for(let k=0;k<S.n;k++){if(S.xc[k]>x+1e-9&&(ah<0||S.xc[k]<S.xc[ah]))ah=k;if(S.xc[k]<=x+1e-9&&(bh<0||S.xc[k]>S.xc[bh]))bh=k;}
+        if(ah<0)F=interp(S.prof,x-S.xc[S.n-1]);else{F=interp(S.prof,x-S.xc[ah]);if(D.mode==='pushpull'&&bh>=0)F-=interp(S.prof,x-S.xc[bh]);}}
+      return F*r.Iss;}),color:col(i),label:vlab(r)}));
+  S1.push({x:[x0*1e3,x1*1e3],y:[ff,ff],color:'#a83232',dash:true,label:t('dl.fric')});
+  plot($('d1'),S1,t('dx.pos'),t('dy.force'),{yzero:true,xfmt:x=>x.toFixed(1)+' mm',yfmt:y=>y.toFixed(3)+' N'});
+  const first=$('dynWin').value==='first',tl=first?0.15:Infinity,sc=first?1e3:1,xl=first?t('dx.tms'):t('dx.ts');
+  const ser=(j,f)=>D.runs.map((r,i)=>{const L=r.log.filter(q=>q[0]<=tl),st=Math.max(1,Math.ceil(L.length/2500)),x=[],y=[];for(let k=0;k<L.length;k+=st){x.push(L[k][0]*sc);y.push(f(L[k][j]));}return{x,y,color:col(i),label:r.V+' V'};});
+  const tf=first?(v=>v.toFixed(1)+' ms'):(v=>v.toFixed(3)+' s');
+  plot($('d2'),ser(1,v=>v*1e3),xl,t('dy.pos'),{xfmt:tf,yfmt:y=>y.toFixed(2)+' mm'});
+  plot($('d3'),ser(2,v=>v),xl,t('dy.v'),{yzero:true,xfmt:tf,yfmt:y=>y.toFixed(3)+' m/s'});
+  plot($('d4'),ser(3,v=>v/9.81),xl,t('dy.a'),{yzero:true,xfmt:tf,yfmt:y=>y.toFixed(1)+' g'});
+  plot($('d5'),ser(5,v=>v),xl,t('dy.I'),{y0:true,xfmt:tf,yfmt:y=>y.toFixed(3)+' A'});
+  const f2=(v,d)=>isFinite(v)?v.toFixed(d):'—';
+  $('dynTbl').querySelector('tbody').innerHTML=D.runs.map(r=>`<tr><td>${r.V} V${r.cc?' · '+t('dyn.cc'):''}</td><td>${f2(r.Iss,2)}</td><td>${f2(r.peak,2)}</td><td>${f2(r.startF*1e3,0)}</td><td>${f2(r.Fa,2)}</td><td>${f2(r.aa/9.81,1)}</td><td>${f2(r.tc*1e3,1)}</td><td>${f2(r.vmax,2)}</td><td>${f2(r.xo*1e3,1)}</td><td>${r.complete?f2(r.settle*1e3,0):t('dyn.nost')}</td><td>${f2(r.E,2)}</td><td>${f2(r.P,1)}</td></tr>`).join('');
+}
+for(const id of['d1','d2','d3','d4','d5'])attachHover($(id));
+$('dynRun').addEventListener('click',runDyn);
+$('dynWin').addEventListener('change',()=>{if(DYN)drawDyn();});
+applyPreset('bench');
 applyLang();
 </script>
 </body>

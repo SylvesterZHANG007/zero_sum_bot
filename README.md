@@ -1,4 +1,4 @@
-# Magnetic Piston Actuator — Feasibility Instrument v2
+# Magnetic Piston Actuator — Feasibility Instrument v3
 
 A single-file, client-side design-space tool for a magnetic piston pump driving an elastomeric endcap. It plots the **required force** (Gent hyperelastic endcap coupled to Boyle's law) against the **available force** (exact finite coaxial solenoid, elliptic-integral mutual inductance) along the plunger stroke, and reports whether the force balance closes over the whole stroke.
 
@@ -28,6 +28,19 @@ This is a rebuild and extension of the original **Zero-Sum feasibility instrumen
 | Stroke specified in µL | Correct way to compare bore radii for a joint of fixed size |
 | Hover readouts, click-through, sorting, CSV export, EN/中文 toggle | Usability |
 
+## What was added in v3
+
+| Addition | Why it matters |
+|---|---|
+| Pre-wound (catalogue) coil: bobbin ID, height, OD, turns, wire and bare-copper diameter, flange and bobbin wall, measured R | Commercial coils keep their own length and inner radius; the coil is no longer forced to the magnet length. A measured resistance fits the layer spacing, so the mean turn radius is pinned without opening the coil |
+| Coil pitch as an input, decoupled from coil and magnet length | Real coils are not always touching; the step and push–pull curves depend strongly on the gap |
+| Switching scheme: pull-ahead (original), push–pull, step (one coil at a time) | Push–pull roughly doubles the worst-case pull; step mode starts each move from the next coil's weak tail |
+| Bench-supply drive: current = min(V/R, limit) | Matches a CV/CC lab supply, so a voltage setting maps directly to a coil current |
+| Dynamics panel: x(t), v(t), a(t), supply current, static thrust vs position, per-voltage summary table | Back-EMF, coil inductance (Wheeler estimate or measured), supply current limit, Coulomb friction, flyback on switch-off; agrees with a SciPy reference to 0.1% |
+| Presets: Oct 2026 bench hardware, original defaults | One click to the current build or back to the reference case |
+
+Regression: with the original-defaults preset in gauge + layers mode the verdict is unchanged (81 / 96 positive margin, as in v2).
+
 ## Model
 
 - **Magnetics.** The magnet is treated as a uniformly magnetised cylinder, equivalent to surface poles on its end faces: `F = (Br/μ₀)·I·[M(top) − M(bottom)]`, with `M` the exact mutual inductance between the multi-layer coil and a loop of the magnet's radius, evaluated in complete elliptic integrals (AGM). This is not a point-dipole approximation. Commutation energises the nearest *overlap* coils ahead of the magnet; the force dip at each coil centre is real geometry, not numerical noise.
@@ -43,7 +56,7 @@ This is a rebuild and extension of the original **Zero-Sum feasibility instrumen
 
 ## Not modelled
 
-Ferrofluid seal behaviour at a gas interface, magnet rotation off-axis, eddy currents, wire temperature coefficient, dynamics and back-EMF, and anything downstream of the endcap (joint moment, leg kinematics). This is a design-space exploration tool, not a substitute for hardware validation.
+Ferrofluid seal behaviour at a gas interface, magnet tilt and rotation, radial pull from an off-centre coil, eddy currents, wire temperature coefficient, the pneumatic load inside the dynamics run, and anything downstream of the endcap (joint moment, leg kinematics). This is a design-space exploration tool, not a substitute for hardware validation.
 
 ## Running it
 
